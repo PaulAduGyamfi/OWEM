@@ -33,3 +33,14 @@ reference /docs/discovery/friction-analysis.md
 # Scope Statement
 Turn a messy restaurant receipt into an accurate group settlement.
 
+# V1 Scope
+(V1 MVP, no AI model)
+1. Create an event (dinner)
+2. Add participants by name
+3. Enter receipt items manually
+4. Assign items to participants
+5. Split shared items
+6. Enter tax and tip
+7. Calculate and display exact balances
+8. Record payments and show who still owes
+
