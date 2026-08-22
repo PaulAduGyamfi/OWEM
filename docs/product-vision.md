@@ -24,6 +24,11 @@ V1 IS NOT:
 # Success Metrics
 reference /docs/discovery/friction-analysis.md
 
+* settlement time under 3 minutes
+* zero manual calculation made by payer
+* zero arithmetic errors 
+* reminder follow-up requires zero payer effort
+
 # Scope Statement
 Turn a messy restaurant receipt into an accurate group settlement.
 

@@ -1,5 +1,5 @@
 **Tell me about the last time you went to dinner with a group. How did the group pay?**
-* last week for lunch, with group from church 
+* last week for lunch, with group from church about 6 people
 
 Who paid initially?
 * one person paid and everyone paid that person

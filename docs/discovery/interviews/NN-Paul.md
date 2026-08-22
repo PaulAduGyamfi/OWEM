@@ -1,5 +1,5 @@
 Tell me about the last time you went to dinner with a group. How did the group pay?
-* The last time i went to dinner with a group was for a birthday outing at topgolf. One person put their card down, everyone ordered the food they wanted then paid the person who covered via zelle, apple cash, etc.
+* The last time i went to dinner with a group was for a birthday outing at topgolf (6 people). One person put their card down, everyone ordered the food they wanted then paid the person who covered via zelle, apple cash, etc.
 
 Who paid initially?
 * one of the people in the group, Shadrack
