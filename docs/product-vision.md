@@ -8,6 +8,7 @@ The person who paid the entire bill for a group at a restaurant. Not the group. 
 reference /discovery/current-workflow.md
 
 # Desired Workflow
+reference /architecture/system-overview.md
 
 # Non-goals
 V1 IS NOT:
