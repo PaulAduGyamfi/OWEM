@@ -1,0 +1,2 @@
+# DECISION 1. 
+V1 has exactly one authenticated actor per event: the payer. Participants are records owned by the event, identified by display name, with no login. Participant accounts are a V2 concern.

@@ -5,23 +5,24 @@ When groups go to restaurants or activities, one person frequently pays the full
 The person who paid the entire bill for a group at a restaurant. Not the group. Not the person who owes. The payer. One user, one job.
 
 # Current Workflow
-reference discovery/current-workflow.md
+reference /discovery/current-workflow.md
 
 # Desired Workflow
 
 # Non-goals
-IS NOT:
-    - A bank
-    - A Venmo/Zelle/Cash App competitor
-    - A social network
-    - Cryptocurrency payments
-    - A credit card product
-    - Full travel or corporate expense management - Autonomous money transfers
-    - A fleet of ten AI agents
-    - Multi-currency
-    - Recurring/subscription splitting
+V1 IS NOT:
+* A bank
+* A Venmo/Zelle/Cash App competitor
+* A social network
+* Cryptocurrency payments
+* A credit card product
+* Full travel or corporate expense management - Autonomous money transfers
+* A fleet of ten AI agents
+* Multi-currency
+* Recurring/subscription splitting
 
 # Success Metrics
+reference /docs/discovery/friction-analysis.md
 
 # Scope Statement
 Turn a messy restaurant receipt into an accurate group settlement.
