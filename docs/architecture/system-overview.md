@@ -12,3 +12,27 @@
 
   
     
+- The backend uses a four-layer structure, and dependencies point inward only:
+
+
+HTTP
+
+v
+
+Controller (parse, authorize, map DTOs. NO business logic.) 
+
+v
+
+Application Service (orchestration, transactions, use-case flow)
+
+v
+
+Domain (entities, value objects, settlement engine. NO framework, NO database, NO HTTP, NO AI.)
+
+v
+
+Repository (persistence interface)
+
+v
+
+PostgreSQL

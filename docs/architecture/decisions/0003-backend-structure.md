@@ -1,0 +1,1 @@
+INVARIANT 2. The domain project has zero references to EF Core, ASP.NET, the AI SDK, or any I/O library. Enforce this with a build-level check — in .NET, the domain .csproj simply lists no such package references, and a CI step asserts it.
