@@ -1,5 +1,5 @@
 # Frontend
-Next.js (App Router) + React + TypeScript
+Expo + React Native + TypeScript
 
 # Backend
 C# / ASP.NET Core on .NET (current LTS)

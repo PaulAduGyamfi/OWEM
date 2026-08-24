@@ -10,10 +10,39 @@
 10. Payments recorded as they arrive [DETERMINISTIC]
 11. Outstanding participants reminded [AI DRAFTS, HUMAN APPROVES]
 
-  
-    
-- The backend uses a four-layer structure, and dependencies point inward only:
 
+
+
+
+## Pieces of the system
+
+Phone / web app (Expo, React Native, TypeScript)
+
+           |
+
+         HTTPS
+
+          |
+
+API (ASP.NET Core, C#)
+         
+         |
+         +--> PostgreSQL (all data)
+         +--> AWS S3 (receipt photos)
+          +--> AI provider (reads receipt photos)
+
+
+
+
+
+
+
+
+
+
+## Backend layers - dependencies point INWARD only
+
+- The backend uses a four-layer structure, and dependencies point inward only:
 
 HTTP
 
@@ -36,3 +65,9 @@ Repository (persistence interface)
 v
 
 PostgreSQL
+
+
+## Why the Domain layer knows nothing about anything
+The settlement engine must be testable as a pure function. If it needed a database to run, the tests would need a database, they would be slow, we would write fewer of them, and correctness would suffer.
+A pure domain means a thousand settlement tests run in under a second. That is the whole reason for this structure.
+INVARIANT 2: the Domain project references no database, no HTTP, no AI library. Enforced by having no such packages installed.
