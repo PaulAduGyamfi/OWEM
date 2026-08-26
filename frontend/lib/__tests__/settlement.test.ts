@@ -198,3 +198,78 @@ test('recording the last payment settles the event', () => {
   assert.equal(api.summarise(s, 'ev2').outstanding, 0);
   assert.equal(s.events.find((e) => e.id === 'ev2')!.status, 'SETTLED');
 });
+
+// ── regressions from the SDK 54 audit ───────────────────────────────────────
+
+test("one person's overpayment cannot cancel another person's debt", () => {
+  let s = api.initialState();
+  const before = api.summarise(s, 'ev2');
+  const owing = before.settlement!.lines.filter((l) => !api.isPayer(s, l.participantId));
+  const first = owing[0];
+
+  // Pay the WHOLE table's worth against one person — a misplaced decimal is enough.
+  s = api.createPayment(s, 'ev2', first.participantId, before.owedToPayer, 'venmo');
+
+  const after = api.summarise(s, 'ev2');
+  const stillOwed = owing
+    .filter((l) => l.participantId !== first.participantId)
+    .reduce((a, l) => a + l.amountOwed, 0);
+
+  assert.equal(after.outstanding, stillOwed, 'the others still owe every cent');
+  assert.ok(after.outstanding > 0);
+  assert.equal(
+    s.events.find((e) => e.id === 'ev2')!.status,
+    'COLLECTING',
+    'an event with people still owing is not settled',
+  );
+});
+
+test('the home total is the sum of what each person still owes', () => {
+  let s = api.initialState();
+  const summary = api.summarise(s, 'ev2');
+  const first = summary.settlement!.lines.find((l) => !api.isPayer(s, l.participantId))!;
+  s = api.createPayment(s, 'ev2', first.participantId, cents(first.amountOwed + 5000), 'venmo');
+
+  const perPerson = s.events.reduce((total, e) => {
+    const st = api.latestSettlement(s, e.id);
+    if (!st) return total;
+    return (
+      total +
+      st.lines
+        .filter((l) => !api.isPayer(s, l.participantId))
+        .reduce((a, l) => a + Math.max(0, l.amountOwed - api.paidBy(s, e.id, l.participantId)), 0)
+    );
+  }, 0);
+
+  assert.equal(api.totalOutstanding(s), perPerson);
+});
+
+test('an event with no settlement is never reported as settled', () => {
+  let s = api.initialState();
+  const [next, id] = api.createEvent(s, { title: 'Nothing yet', place: null });
+  s = next;
+  const summary = api.summarise(s, id);
+  assert.equal(summary.settlement, null);
+  assert.equal(summary.outstanding, 0, 'nothing is owed because nothing was worked out');
+  assert.equal(s.events.find((e) => e.id === id)!.status, 'DRAFT');
+});
+
+test('a part payment leaves exactly the remainder outstanding', () => {
+  let s = api.initialState();
+  const st = api.latestSettlement(s, 'ev2')!;
+  const line = st.lines.find((l) => !api.isPayer(s, l.participantId))!;
+  const before = api.summarise(s, 'ev2').outstanding;
+  s = api.createPayment(s, 'ev2', line.participantId, cents(100), 'cash');
+  assert.equal(api.summarise(s, 'ev2').outstanding, before - 100);
+});
+
+test('paying everyone exactly settles the event, and no further', () => {
+  let s = api.initialState();
+  const st = api.latestSettlement(s, 'ev2')!;
+  for (const l of st.lines) {
+    if (api.isPayer(s, l.participantId)) continue;
+    s = api.createPayment(s, 'ev2', l.participantId, l.amountOwed, 'venmo');
+  }
+  assert.equal(api.summarise(s, 'ev2').outstanding, 0);
+  assert.equal(s.events.find((e) => e.id === 'ev2')!.status, 'SETTLED');
+});
