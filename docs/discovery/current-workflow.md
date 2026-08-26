@@ -12,3 +12,8 @@
 12. Payer checks transaction history 
 13. Payer tracks who has not paid 
 14. Payer follows up manually, repeatedly through text or verbally
+
+
+
+## What people said was worst
+having to go into banking app to send money.

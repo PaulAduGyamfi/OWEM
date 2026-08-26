@@ -1,43 +1,12 @@
-# Secrets and local configuration
-.env
-.env.*
-!.env.example
-!.env.*.example
-
-# Dependencies
-node_modules/
-
-# Next.js / frontend build output
-.next/
-out/
-dist/
-build/
-*.tsbuildinfo
-
-# .NET build output
-[Bb]in/
-[Oo]bj/
-[Ll]og/
-[Ll]ogs/
+# Secrets - NEVER commit these .env
+.env.local
+*.env appsettings.Development.json
+# .NET build output bin/
+obj/
 *.user
-*.suo
-*.userosscache
-project.lock.json
-artifacts/
-
-# Test and coverage output
-TestResults/
-coverage/
-*.coverage
-*.coveragexml
-*.trx
-
-# OS and editor
-.DS_Store
-.vs/
-.idea/
-
-# Real receipts and PII — keep the folder, never commit contents
-evals/dataset/*
-!evals/dataset/README.md
-!evals/dataset/.gitkeep
+# Node node_modules/ .expo/
+dist/ web-build/
+# OS junk .DS_Store Thumbs.db
+# Real receipt images (they contain personal data) evals/dataset/*.jpg
+evals/dataset/*.jpeg
+evals/dataset/*.png

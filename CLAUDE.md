@@ -46,3 +46,13 @@ After approval:
 - Catching an exception and returning a default monetary value
 - A settlement calculation whose parts do not sum exactly to the total - New dependencies added without being called out explicitly
 
+
+# Where The Detail Lives
+- Schema and tables: docs/architecture/data-model.md
+- Endpoints and errors: docs/architecture/api-design.md
+- AI contracts: docs/architecture/ai-design.md
+- Security controls: docs/architecture/security.md
+- Why things are this way: docs/architecture/decisions/
+
+
+If a task touches one of these areas and the relevant document was not given to you, ASK FOR IT before planning. Do not infer the schema or the API contract from surrounding code.

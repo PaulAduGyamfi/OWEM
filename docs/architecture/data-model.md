@@ -192,3 +192,7 @@ A record of every single AI request. Written from the very first call, because "
 
 
 NEVER put the receipt image or personal data in this table. Store the S3 key only.
+
+
+
+
