@@ -54,5 +54,8 @@ After approval:
 - Security controls: docs/architecture/security.md
 - Why things are this way: docs/architecture/decisions/
 
+# Frontend UI 
+reference docs/design-system.md for the design sysytem for the ui
+
 
 If a task touches one of these areas and the relevant document was not given to you, ASK FOR IT before planning. Do not infer the schema or the API contract from surrounding code.

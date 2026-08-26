@@ -1,0 +1,257 @@
+{
+  "pages": [
+    {
+      "id": "page-1",
+      "name": "The flow"
+    },
+    {
+      "id": "page-2",
+      "name": "Foundations"
+    }
+  ],
+  "artboards": [
+    {
+      "file": "Welcome.dc.html",
+      "x": 0,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "title": "1 · Welcome",
+      "page": "page-1"
+    },
+    {
+      "file": "Main.dc.html",
+      "x": 480,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "title": "2 · Events",
+      "page": "page-1"
+    },
+    {
+      "file": "NewEvent.dc.html",
+      "x": 960,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "title": "3 · New event",
+      "page": "page-1"
+    },
+    {
+      "file": "Participants.dc.html",
+      "x": 1440,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "title": "4 · Who was there",
+      "page": "page-1"
+    },
+    {
+      "file": "Capture.dc.html",
+      "x": 1920,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "title": "5 · Capture",
+      "page": "page-1"
+    },
+    {
+      "file": "Extracting.dc.html",
+      "x": 0,
+      "y": 1004,
+      "w": 390,
+      "h": 844,
+      "title": "6 · Reading",
+      "page": "page-1"
+    },
+    {
+      "file": "Review.dc.html",
+      "x": 480,
+      "y": 1004,
+      "w": 390,
+      "h": 844,
+      "title": "7 · Review items",
+      "page": "page-1"
+    },
+    {
+      "file": "ItemEdit.dc.html",
+      "x": 960,
+      "y": 1004,
+      "w": 390,
+      "h": 844,
+      "title": "8 · Confirm a line",
+      "page": "page-1"
+    },
+    {
+      "file": "ManualEntry.dc.html",
+      "x": 1440,
+      "y": 1004,
+      "w": 390,
+      "h": 844,
+      "title": "9 · Type it in",
+      "page": "page-1"
+    },
+    {
+      "file": "Charges.dc.html",
+      "x": 1920,
+      "y": 1004,
+      "w": 390,
+      "h": 844,
+      "title": "10 · Tax & tip",
+      "page": "page-1"
+    },
+    {
+      "file": "Assign.dc.html",
+      "x": 0,
+      "y": 2008,
+      "w": 390,
+      "h": 844,
+      "title": "11 · Who had what",
+      "page": "page-1"
+    },
+    {
+      "file": "AssignSheet.dc.html",
+      "x": 480,
+      "y": 2008,
+      "w": 390,
+      "h": 844,
+      "title": "12 · Split a line",
+      "page": "page-1"
+    },
+    {
+      "file": "Settlement.dc.html",
+      "x": 960,
+      "y": 2008,
+      "w": 390,
+      "h": 844,
+      "title": "13 · Settlement",
+      "page": "page-1"
+    },
+    {
+      "file": "Breakdown.dc.html",
+      "x": 1440,
+      "y": 2008,
+      "w": 390,
+      "h": 844,
+      "title": "14 · One person",
+      "page": "page-1"
+    },
+    {
+      "file": "History.dc.html",
+      "x": 1920,
+      "y": 2008,
+      "w": 390,
+      "h": 844,
+      "title": "15 · Versions",
+      "page": "page-1"
+    },
+    {
+      "file": "Collect.dc.html",
+      "x": 0,
+      "y": 3012,
+      "w": 390,
+      "h": 844,
+      "title": "16 · Collect",
+      "page": "page-1"
+    },
+    {
+      "file": "RequestSheet.dc.html",
+      "x": 480,
+      "y": 3012,
+      "w": 390,
+      "h": 844,
+      "title": "17 · Ask",
+      "page": "page-1"
+    },
+    {
+      "file": "RecordPayment.dc.html",
+      "x": 960,
+      "y": 3012,
+      "w": 390,
+      "h": 844,
+      "title": "18 · Record",
+      "page": "page-1"
+    },
+    {
+      "file": "Reminders.dc.html",
+      "x": 1440,
+      "y": 3012,
+      "w": 390,
+      "h": 844,
+      "title": "19 · Nudge",
+      "page": "page-1"
+    },
+    {
+      "file": "Settled.dc.html",
+      "x": 1920,
+      "y": 3012,
+      "w": 390,
+      "h": 844,
+      "title": "20 · Settled",
+      "page": "page-1"
+    },
+    {
+      "file": "Foundations.dc.html",
+      "x": 0,
+      "y": 0,
+      "w": 960,
+      "h": 1320,
+      "title": "Component kit",
+      "page": "page-2"
+    }
+  ],
+  "annotations": [
+    {
+      "id": "brief",
+      "x": 0,
+      "y": -230,
+      "w": 900,
+      "page": "page-1",
+      "text": "OWEM · Phase 1 prototype — 20 screens, iOS system neutrals with the brand's acid lime spent exactly once per screen.\nStatic mockups for approval. Numbers are one consistent scenario: a $242.79 bill at Rosati's, five people, tax and tip split in proportion. Every share adds up to the total exactly."
+    },
+    {
+      "id": "row-1",
+      "x": -320,
+      "y": 40,
+      "w": 260,
+      "page": "page-1",
+      "text": "1 · START\nGet in, name the dinner, name the table. Nobody but the payer has an account."
+    },
+    {
+      "id": "row-2",
+      "x": -320,
+      "y": 1044,
+      "w": 260,
+      "page": "page-1",
+      "text": "2 · THE RECEIPT\nThe model reads it; you confirm it. Amber means a human still has to look — those lines cannot reach the maths."
+    },
+    {
+      "id": "row-3",
+      "x": -320,
+      "y": 2048,
+      "w": 260,
+      "page": "page-1",
+      "text": "3 · ASSIGN AND SETTLE\nWeights handle 'two of the three beers'. The settlement is locked and versioned — a correction writes v2, it never edits v1."
+    },
+    {
+      "id": "row-4",
+      "x": -320,
+      "y": 3052,
+      "w": 260,
+      "page": "page-1",
+      "text": "4 · COLLECT\nOWEM hands off to the rail with the amount filled in, then you confirm what landed. It never moves money and never marks anyone paid on its own."
+    },
+    {
+      "id": "kit-note",
+      "x": -320,
+      "y": 40,
+      "w": 260,
+      "page": "page-2",
+      "text": "Every screen is built from these. This is also the component list Phase 2 builds first, so the clickable build is assembly, not invention."
+    }
+  ],
+  "launch": {
+    "view": "canvas",
+    "page": "page-1"
+  }
+}

@@ -1,0 +1,196 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0;font-family:-apple-system,"SF Pro Text",system-ui,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}
+a{color:#000000;text-decoration:none}a:hover{color:#6D6D72}
+.n{font-variant-numeric:tabular-nums}
+.card{background:#FFFFFF;border:0.5px solid #C6C6C8;border-radius:20px;padding:24px}
+.h{font-size:11px;line-height:14px;font-weight:500;letter-spacing:.02em;color:#6D6D72;margin-bottom:16px}
+.sw{display:flex;flex-direction:column;gap:6px}
+.swb{height:40px;border-radius:8px}
+.swl{font-size:11px;line-height:14px;color:#6D6D72}
+.btn{height:48px;border-radius:999px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:600}
+.chip{height:36px;padding:0 14px;border-radius:999px;display:flex;align-items:center;font-size:15px;font-weight:500}
+.bdg{height:24px;padding:0 10px;border-radius:999px;display:inline-flex;align-items:center;font-size:11px;font-weight:500;letter-spacing:.02em}
+</style>
+</helmet>
+<div style="width:960px;height:1320px;background:#F2F2F7;color:#000000;padding:40px;box-sizing:border-box">
+
+  <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:28px">
+    <div>
+      <div style="font-size:34px;line-height:40px;font-weight:700;letter-spacing:-.02em">The kit</div>
+      <div style="margin-top:6px;font-size:16px;line-height:24px;color:#6D6D72">iOS system neutrals, acid lime for the one action, and the component list Phase 2 builds first.</div>
+    </div>
+    <div style="display:flex;gap:8px">
+      <div class="bdg" style="background:#C9F31D;color:#000000">ONE LIME PER SCREEN</div>
+      <div class="bdg" style="background:#E5E5EA;color:#000000">ON LIME, ALWAYS BLACK</div>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:32px">
+
+    <div style="display:flex;flex-direction:column;gap:32px">
+
+      <div class="card">
+        <div class="h">LIGHT</div>
+        <div style="display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px">
+          <div class="sw"><div class="swb" style="background:#F2F2F7;border:0.5px solid #C6C6C8;box-sizing:border-box"></div><div class="swl">bg</div></div>
+          <div class="sw"><div class="swb" style="background:#FFFFFF;border:0.5px solid #C6C6C8;box-sizing:border-box"></div><div class="swl">surface</div></div>
+          <div class="sw"><div class="swb" style="background:#E5E5EA"></div><div class="swl">surface-alt</div></div>
+          <div class="sw"><div class="swb" style="background:#000000"></div><div class="swl">ink</div></div>
+          <div class="sw"><div class="swb" style="background:#6D6D72"></div><div class="swl">ink-2nd</div></div>
+          <div class="sw"><div class="swb" style="background:#AEAEB2"></div><div class="swl">ink-3rd</div></div>
+          <div class="sw"><div class="swb" style="background:#C6C6C8"></div><div class="swl">border</div></div>
+          <div class="sw"><div class="swb" style="background:#C9F31D"></div><div class="swl">accent</div></div>
+          <div class="sw"><div class="swb" style="background:#F4FBD8"></div><div class="swl">accent-soft</div></div>
+          <div class="sw"><div class="swb" style="background:#34C759"></div><div class="swl">positive</div></div>
+          <div class="sw"><div class="swb" style="background:#FF9500"></div><div class="swl">warning</div></div>
+          <div class="sw"><div class="swb" style="background:#FF3B30"></div><div class="swl">negative</div></div>
+        </div>
+
+        <div class="h" style="margin-top:24px">DARK &mdash; TRUE BLACK, WHERE THE LIME WAS BORN</div>
+        <div style="background:#000000;border-radius:16px;padding:16px">
+          <div style="display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px">
+            <div class="sw"><div class="swb" style="background:#000000;border:0.5px solid #38383A;box-sizing:border-box"></div><div class="swl" style="color:#A1A1A6">bg</div></div>
+            <div class="sw"><div class="swb" style="background:#1C1C1E"></div><div class="swl" style="color:#A1A1A6">surface</div></div>
+            <div class="sw"><div class="swb" style="background:#2C2C2E"></div><div class="swl" style="color:#A1A1A6">surface-alt</div></div>
+            <div class="sw"><div class="swb" style="background:#FFFFFF"></div><div class="swl" style="color:#A1A1A6">ink</div></div>
+            <div class="sw"><div class="swb" style="background:#38383A"></div><div class="swl" style="color:#A1A1A6">border</div></div>
+            <div class="sw"><div class="swb" style="background:#C9F31D"></div><div class="swl" style="color:#A1A1A6">accent</div></div>
+          </div>
+        </div>
+
+        <div style="margin-top:18px;font-size:13px;line-height:18px;color:#6D6D72">Lime is a surface, never a type colour &mdash; it fails contrast on white. Links and second-tier actions take ink instead. Amber says a human still has to look; system green only ever means money arriving, and only on its soft pill, so the two are never confused.</div>
+      </div>
+
+      <div class="card">
+        <div class="h">TYPE &mdash; SF PRO, TABULAR FIGURES ON EVERY AMOUNT</div>
+        <div style="display:flex;flex-direction:column;gap:14px">
+          <div style="display:flex;align-items:baseline;justify-content:space-between"><div class="n" style="font-size:44px;line-height:48px;font-weight:700;letter-spacing:-.03em">$242.79</div><div class="swl">display-xl &middot; 44/48 &middot; 700</div></div>
+          <div style="display:flex;align-items:baseline;justify-content:space-between"><div class="n" style="font-size:34px;line-height:40px;font-weight:700;letter-spacing:-.02em">$60.28</div><div class="swl">display-lg &middot; 34/40 &middot; 700</div></div>
+          <div style="display:flex;align-items:baseline;justify-content:space-between"><div style="font-size:28px;line-height:34px;font-weight:700;letter-spacing:-.02em">Who had what</div><div class="swl">title-1 &middot; 28/34</div></div>
+          <div style="display:flex;align-items:baseline;justify-content:space-between"><div style="font-size:22px;line-height:28px;font-weight:600;letter-spacing:-.01em">Chicken Wings</div><div class="swl">title-2 &middot; 22/28</div></div>
+          <div style="display:flex;align-items:baseline;justify-content:space-between"><div style="font-size:16px;line-height:22px;font-weight:600">Albert</div><div class="swl">body-strong &middot; 16/22</div></div>
+          <div style="display:flex;align-items:baseline;justify-content:space-between"><div class="n" style="font-size:15px;line-height:20px;font-weight:500">$46.28</div><div class="swl">callout &middot; 15/20</div></div>
+          <div style="display:flex;align-items:baseline;justify-content:space-between"><div style="font-size:13px;line-height:18px;color:#6D6D72">CHK WNG &middot; 71% sure</div><div class="swl">footnote &middot; 13/18</div></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="h">BUTTONS &mdash; ONE LIME, THE REST INK</div>
+        <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px">
+          <div class="btn" style="background:#C9F31D;color:#000000">Primary</div>
+          <div class="btn" style="background:#000000;color:#FFFFFF">Ink</div>
+          <div class="btn" style="background:#E5E5EA;color:#000000">Secondary</div>
+          <div class="btn" style="background:transparent;color:#000000;border:0.5px solid #C6C6C8;box-sizing:border-box">Tertiary</div>
+          <div class="btn" style="background:transparent;color:#000000">Ghost</div>
+          <div class="btn" style="background:#E5E5EA;color:#AEAEB2">Disabled</div>
+        </div>
+        <div style="margin-top:16px;height:56px;border-radius:999px;background:#C9F31D;display:flex;align-items:center;padding:4px;box-sizing:border-box">
+          <div style="width:48px;height:48px;border-radius:999px;background:#FFFFFF;display:flex;align-items:center;justify-content:center;flex:none">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 6l6 6-6 6"/></svg>
+          </div>
+          <div style="flex:1 1 auto;text-align:center;font-size:16px;font-weight:600;color:#000000;padding-right:48px">Slide to record</div>
+        </div>
+        <div style="margin-top:12px;font-size:13px;line-height:18px;color:#6D6D72">Drag-to-commit appears once per flow, on the one action that changes what somebody owes. When the primary action isn't available yet, it goes grey &mdash; it never sits there in lime, unusable.</div>
+      </div>
+
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:32px">
+
+      <div class="card">
+        <div class="h">PROVENANCE &mdash; THE STATE THAT GOVERNS THE MATHS</div>
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <div style="display:flex;align-items:center;gap:14px">
+            <div class="bdg" style="background:#FFF4E5;color:#B25000;width:112px;justify-content:center">Needs you</div>
+            <div style="font-size:14px;line-height:20px;color:#6D6D72"><span style="font-weight:600;color:#000000">AI_SUGGESTED</span> &mdash; the engine refuses it.</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:14px">
+            <div class="bdg" style="background:#E9F8EE;color:#248A3D;width:112px;justify-content:center">Confirmed</div>
+            <div style="font-size:14px;line-height:20px;color:#6D6D72"><span style="font-weight:600;color:#000000">USER_CONFIRMED</span> &mdash; a person accepted it.</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:14px">
+            <div class="bdg" style="background:#E5E5EA;color:#6D6D72;width:112px;justify-content:center">Worked out</div>
+            <div style="font-size:14px;line-height:20px;color:#6D6D72"><span style="font-weight:600;color:#000000">SYSTEM_COMPUTED</span> &mdash; our own arithmetic.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="h">LIST ROW &middot; 72PX WITH AVATAR AND SUBTITLE</div>
+        <div style="background:#FFFFFF;border:0.5px solid #C6C6C8;border-radius:16px;overflow:hidden">
+          <div style="height:72px;display:flex;align-items:center;gap:12px;padding:0 16px">
+            <div style="width:40px;height:40px;border-radius:999px;background:#E5E5EA;color:#6D6D72;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:600;flex:none">A</div>
+            <div style="flex:1 1 auto"><div style="font-size:16px;line-height:22px;font-weight:600">Albert</div><div class="n" style="font-size:13px;line-height:18px;color:#6D6D72">$46.28 food &middot; $4.74 tax &middot; $9.26 tip</div></div>
+            <div class="n" style="font-size:17px;font-weight:700;flex:none">$60.28</div>
+          </div>
+          <div style="height:0.5px;background:#C6C6C8;margin-left:68px"></div>
+          <div style="height:72px;display:flex;align-items:center;gap:12px;padding:0 16px">
+            <div class="n" style="width:36px;height:36px;border-radius:8px;background:#E5E5EA;color:#6D6D72;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;flex:none">&times;2</div>
+            <div style="flex:1 1 auto"><div style="font-size:16px;line-height:22px;font-weight:600">Margarita</div><div style="font-size:12px;line-height:18px;color:#6D6D72;font-family:ui-monospace,'SF Mono',Menlo,monospace">2 MARG &middot; 68% sure</div></div>
+            <div style="text-align:right;flex:none"><div class="n" style="font-size:15px;font-weight:500">$26.00</div><div class="bdg" style="background:#FFF4E5;color:#B25000;margin-top:3px">Needs you</div></div>
+          </div>
+        </div>
+        <div style="margin-top:12px;font-size:13px;line-height:18px;color:#6D6D72">Hairlines at 0.5px, inset to the text edge. The printed name sits under the interpreted one, so a dispute has an answer.</div>
+      </div>
+
+      <div class="card">
+        <div class="h">CHIPS, BADGES, AVATARS</div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <div class="chip" style="background:#000000;color:#FFFFFF">Everyone</div>
+          <div class="chip" style="background:#E5E5EA;color:#000000">Just me</div>
+          <div class="chip" style="background:#F4FBD8;color:#000000">Selected</div>
+          <div class="bdg" style="background:#E9F8EE;color:#248A3D">Settled</div>
+          <div class="bdg" style="background:#FFF4E5;color:#B25000">Collecting</div>
+          <div class="bdg" style="background:#E5E5EA;color:#6D6D72">VERSION 1</div>
+        </div>
+        <div style="margin-top:20px;display:flex;align-items:center;gap:32px">
+          <div style="display:flex;align-items:flex-end;gap:10px">
+            <div style="width:24px;height:24px;border-radius:999px;background:#E5E5EA;color:#6D6D72;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600">M</div>
+            <div style="width:32px;height:32px;border-radius:999px;background:#E5E5EA;color:#6D6D72;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600">N</div>
+            <div style="width:40px;height:40px;border-radius:999px;background:#E5E5EA;color:#6D6D72;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:600">A</div>
+            <div style="width:56px;height:56px;border-radius:999px;background:#000000;color:#FFFFFF;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:600">P</div>
+          </div>
+          <div style="position:relative;width:112px;height:40px">
+            <div style="position:absolute;left:0;width:40px;height:40px;border-radius:999px;background:#000000;color:#FFFFFF;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:600;box-shadow:0 0 0 2px #FFFFFF">P</div>
+            <div style="position:absolute;left:28px;width:40px;height:40px;border-radius:999px;background:#E5E5EA;color:#6D6D72;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:600;box-shadow:0 0 0 2px #FFFFFF">A</div>
+            <div style="position:absolute;left:56px;width:40px;height:40px;border-radius:999px;background:#E5E5EA;color:#6D6D72;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:600;box-shadow:0 0 0 2px #FFFFFF">D</div>
+            <div style="position:absolute;left:84px;width:40px;height:40px;border-radius:999px;background:#E5E5EA;color:#6D6D72;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;box-shadow:0 0 0 2px #FFFFFF">+2</div>
+          </div>
+        </div>
+        <div style="margin-top:16px;font-size:13px;line-height:18px;color:#6D6D72">Participants are grey; only the payer is inked. Colour on a person would read as a status, and status is reserved for money.</div>
+      </div>
+
+      <div class="card" style="background:#000000;border-color:#000000">
+        <div class="h" style="color:#A1A1A6">NAVIGATION &mdash; GLASS, ABOVE THE CONTENT, NEVER PINNED</div>
+        <div style="display:flex;align-items:center;gap:12px">
+          <div style="height:56px;width:176px;border-radius:999px;background:rgba(255,255,255,.12);backdrop-filter:blur(30px) saturate(180%);-webkit-backdrop-filter:blur(30px) saturate(180%);border:0.5px solid rgba(255,255,255,.16);display:flex;align-items:center;justify-content:space-around;padding:0 6px;box-sizing:border-box">
+            <div style="width:44px;height:44px;border-radius:999px;background:#C9F31D;display:flex;align-items:center;justify-content:center">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="#000000" stroke="#000000" stroke-width="1.75" stroke-linejoin="round"><path d="M4 10.5L12 4l8 6.5V19a1.5 1.5 0 01-1.5 1.5h-13A1.5 1.5 0 014 19z"/></svg>
+            </div>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#636366" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19.5c.6-3 2.8-4.6 5.5-4.6s4.9 1.6 5.5 4.6"/><path d="M16.5 5.4a3.2 3.2 0 010 5.2"/><path d="M18 15.4c2 .6 3.2 2.1 3.6 4.1"/></svg>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#636366" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c.7-3.6 3.4-5.5 7-5.5s6.3 1.9 7 5.5"/></svg>
+          </div>
+          <div style="width:56px;height:56px;border-radius:999px;background:#FFFFFF;display:flex;align-items:center;justify-content:center">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+          </div>
+          <div style="margin-left:12px;font-size:13px;line-height:18px;color:#A1A1A6;max-width:150px">Glass belongs to the navigation layer only. Content underneath stays solid, and nothing glass sits on glass.</div>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+</x-dc>
+</body>
+</html>

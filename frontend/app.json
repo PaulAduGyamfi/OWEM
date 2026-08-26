@@ -1,0 +1,50 @@
+{
+  "expo": {
+    "name": "OWEM",
+    "slug": "owem",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/icon.png",
+    "scheme": "owem",
+    "userInterfaceStyle": "automatic",
+    "primaryColor": "#C9F31D",
+    "splash": {
+      "image": "./assets/images/splash-full.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#C9F31D"
+    },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.owem.prototype"
+    },
+    "android": {
+      "package": "com.owem.prototype",
+      "predictiveBackGestureEnabled": false,
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "monochromeImage": "./assets/images/adaptive-icon.png",
+        "backgroundColor": "#C9F31D"
+      }
+    },
+    "web": {
+      "output": "static",
+      "favicon": "./assets/images/favicon.png"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/images/splash-icon.png",
+          "imageWidth": 220,
+          "resizeMode": "contain",
+          "backgroundColor": "#C9F31D"
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true,
+      "reactCompiler": true
+    }
+  }
+}
