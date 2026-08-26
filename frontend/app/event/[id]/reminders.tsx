@@ -49,11 +49,12 @@ export default function Reminders() {
     return settlement.lines
       .filter((l) => l.participantId !== payer?.id)
       .map((l) => {
-        const person = participants.find((p) => p.id === l.participantId)!;
+        const person = participants.find((p) => p.id === l.participantId);
+        if (!person) return null;
         const left = cents(Math.max(0, l.amountOwed - api.paidBy(s, id, l.participantId)));
         return { person, left };
       })
-      .filter((r) => r.left > 0);
+      .filter((r): r is NonNullable<typeof r> => r !== null && r.left > 0);
   }, [settlement, participants, payer, s, id]);
 
   if (!event) return <Screen><Header /></Screen>;

@@ -38,11 +38,13 @@ export default function Settled() {
   const paidRows = settlement.lines
     .filter((l) => l.participantId !== payer?.id)
     .map((l) => {
-      const person = participants.find((p) => p.id === l.participantId)!;
+      const person = participants.find((p) => p.id === l.participantId);
+      if (!person) return null;
       const theirs = payments.filter((p) => p.participantId === l.participantId);
       const paid = api.paidBy(s, id, l.participantId);
       return { person, paid, methods: theirs, last: theirs.at(-1) };
-    });
+    })
+    .filter((r): r is NonNullable<typeof r> => r !== null);
 
   return (
     <View style={{ flex: 1, backgroundColor: c.bg }}>

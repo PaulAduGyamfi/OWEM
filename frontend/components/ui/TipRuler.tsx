@@ -1,7 +1,6 @@
 import { View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { runOnJS } from 'react-native-reanimated';
-import { cents } from '@/lib/money.ts';
 import type { Cents } from '@/lib/types.ts';
 import { radius, space, useColors } from '@/theme';
 
@@ -12,24 +11,24 @@ const TICKS = 29;
  * inked to mark the current value. Drag to adjust; tap the figure to type one.
  */
 export function TipRuler({
-  subtotal, value, onChange,
+  subtotal, onAdjust,
 }: {
   subtotal: Cents;
-  value: Cents;
-  onChange: (v: Cents) => void;
+  /**
+   * Reports a DELTA in percentage points, not a value. The pan fires many times
+   * per JS tick, so the parent must fold each one into the latest state itself —
+   * computing a new total from a value captured in this render would drop every
+   * frame but the last.
+   */
+  onAdjust: (deltaPercentPoints: number) => void;
 }) {
   const c = useColors();
 
-  // 4px of travel per cent of the subtotal, so a full drag covers ~0–40%.
-  const commit = (dx: number) => {
-    const deltaPercent = dx / 6;
-    const percent = (value / Math.max(1, subtotal)) * 100 + deltaPercent;
-    const clamped = Math.max(0, Math.min(40, percent));
-    onChange(cents(Math.round((subtotal * clamped) / 100)));
-  };
+  // ~6px of travel per percentage point, so a full drag covers roughly 0–40%.
+  const report = (dx: number) => onAdjust(dx / 6);
 
   const drag = Gesture.Pan().onChange((e) => {
-    runOnJS(commit)(e.changeX);
+    runOnJS(report)(e.changeX);
   });
 
   return (

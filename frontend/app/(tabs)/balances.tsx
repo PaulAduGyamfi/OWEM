@@ -24,12 +24,15 @@ export default function Balances() {
     if (!summary.settlement) return [];
     return summary.settlement.lines
       .filter((l) => !api.isPayer(s, l.participantId))
+      // A settlement line can outlive its participant (someone with no
+      // assignments can be removed), so drop lines whose person is gone.
       .map((l) => {
-        const person = s.participants.find((p) => p.id === l.participantId)!;
+        const person = s.participants.find((p) => p.id === l.participantId);
+        if (!person) return null;
         const paid = api.paidBy(s, event.id, l.participantId);
         return { event, person, owed: l.amountOwed, paid, left: cents(Math.max(0, l.amountOwed - paid)) };
       })
-      .filter((r) => r.left > 0);
+      .filter((r): r is NonNullable<typeof r> => r !== null && r.left > 0);
   });
 
   const total = cents(rows.reduce((a, r) => a + r.left, 0));

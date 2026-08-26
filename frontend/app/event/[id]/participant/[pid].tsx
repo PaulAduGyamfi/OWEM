@@ -15,6 +15,7 @@ import { Money } from '@/components/ui/Money';
 import { Screen } from '@/components/ui/Screen';
 import { Txt } from '@/components/ui/Txt';
 import { RecordPaymentSheet, RequestSheet } from '@/components/owem/PaymentSheets';
+import { Banner } from '@/components/owem/Provenance';
 
 /** One person's amount, and every line that made it. */
 export default function Breakdown() {
@@ -50,6 +51,12 @@ export default function Breakdown() {
       };
     })
     .filter((x): x is NonNullable<typeof x> => x !== null);
+
+  // `had` is derived from LIVE assignments; `line` is the frozen snapshot. If
+  // somebody has been moved on or off a line since this version was locked the
+  // two will disagree, and the snapshot is the thing people were told.
+  const liveSubtotal = had.reduce((a, h) => a + h.share, 0);
+  const staleBy = cents(liveSubtotal - line.itemsSubtotal);
 
   const row = (label: string, value: React.ReactNode, note?: string | null, strong = false) => (
     <View
@@ -97,6 +104,12 @@ export default function Breakdown() {
 
         <View style={{ padding: space[4], gap: space[4] }}>
           <Txt variant="caption" color="inkSecondary">WHAT {person.displayName.toUpperCase()} HAD</Txt>
+          {staleBy !== 0 && (
+            <Banner
+              tone="warning"
+              text={`These lines have changed since version ${settlement.version} was locked — they now come to ${formatMoney(cents(liveSubtotal))}. The total below is what ${person.displayName} was actually told. Re-run the balances to make a new version.`}
+            />
+          )}
           <Card style={{ paddingVertical: space[2] }}>
             {had.map((h) => (
               <View key={h.id}>{row(h.name, <Money value={h.share} />, h.note)}</View>

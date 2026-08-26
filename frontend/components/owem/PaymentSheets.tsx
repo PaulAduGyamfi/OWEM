@@ -206,11 +206,13 @@ export function RecordPaymentSheet({
         <View style={{ flex: 1 }} />
 
         <SlideToConfirm
-          label="Slide to record"
+          label={valid ? 'Slide to record' : 'Enter an amount first'}
           doneLabel="Recorded"
           width={width}
+          disabled={!valid}
           onConfirm={() => {
-            if (parsed !== null) onRecord(parsed, method);
+            if (!valid || parsed === null) return;
+            onRecord(parsed, method);
           }}
         />
         <Txt variant="footnote" color="inkSecondary" center>

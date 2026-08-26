@@ -1,6 +1,6 @@
 import { ScrollView, View } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
-import { formatMoney } from '@/lib/money.ts';
+import { cents, formatMoney } from '@/lib/money.ts';
 import { formatStamp, pluralise } from '@/lib/format.ts';
 import { useEvent } from '@/lib/store';
 import type { Settlement } from '@/lib/types.ts';
@@ -109,8 +109,9 @@ export default function History() {
                           tnum
                           style={{ width: 56, textAlign: 'right', fontWeight: '600' }}
                         >
-                          {d.delta > 0 ? '+' : '−'}
-                          {formatMoney(Math.abs(d.delta) as never).replace('$', '$')}
+                          {d.delta === 0
+                            ? 'new'
+                            : `${d.delta > 0 ? '+' : '−'}${formatMoney(cents(Math.abs(d.delta)))}`}
                         </Txt>
                       </View>
                     </View>

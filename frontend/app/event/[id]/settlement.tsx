@@ -38,8 +38,9 @@ export default function SettlementScreen() {
     );
   }
 
+  // A line can outlive its participant, so only render lines we can name.
   const owing = settlement.lines
-    .filter((l) => l.participantId !== payer?.id)
+    .filter((l) => l.participantId !== payer?.id && participants.some((p) => p.id === l.participantId))
     .sort((a, b) => b.amountOwed - a.amountOwed);
   const payerLine = settlement.lines.find((l) => l.participantId === payer?.id);
 
@@ -74,7 +75,7 @@ export default function SettlementScreen() {
 
           <Grouped inset={68}>
             {owing.map((l) => {
-              const person = participants.find((p) => p.id === l.participantId)!;
+              const person = participants.find((p) => p.id === l.participantId)!; // filtered above
               return (
                 <Row
                   key={l.participantId}

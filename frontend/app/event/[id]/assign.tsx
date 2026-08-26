@@ -24,11 +24,18 @@ export default function Assign() {
   const insets = useSafeAreaInsets();
   const { s } = useOwem();
   const { putAssignments, createSettlement, confirmReceipt } = useOwem();
-  const { items, participants } = useEvent(id);
+  const { items, participants, receipt } = useEvent(id);
   const [open, setOpen] = useState<string | null>(null);
 
   const assignedCount = items.filter((i) => api.assignmentsOf(s, i.id).length > 0).length;
   const missing = items.length - assignedCount;
+
+  // INVARIANT 1 guards the engine by throwing. This screen must never let the
+  // user reach that throw: an unconfirmed line means going back to review,
+  // not a crash.
+  const unconfirmed =
+    items.filter((i) => i.provenance === 'AI_SUGGESTED').length +
+    (receipt?.taxProvenance === 'AI_SUGGESTED' ? 1 : 0);
   const item = items.find((i) => i.id === open) ?? null;
   const payerName = participants.find((p) => p.isPayer)?.displayName;
 
@@ -38,7 +45,8 @@ export default function Assign() {
   // Re-settling after an edit writes a NEW version; it never rewrites the old one.
   const existing = api.latestSettlement(s, id);
   const settle = () => {
-    if (receiptId) confirmReceipt(receiptId);
+    if (missing > 0 || unconfirmed > 0) return;
+    if (receipt) confirmReceipt(receipt.id);
     createSettlement(id, existing ? 'You changed who was on a line.' : null);
     router.push({ pathname: '/event/[id]/settlement', params: { id } });
   };
@@ -127,9 +135,15 @@ export default function Assign() {
             text={`${missing} ${missing === 1 ? 'line has' : 'lines have'} nobody on them. The maths can't run until they do.`}
           />
         )}
+        {missing === 0 && unconfirmed > 0 && (
+          <Banner
+            tone="warning"
+            text={`${unconfirmed} ${unconfirmed === 1 ? 'value is' : 'values are'} still the model's. Confirm them back on the receipt before anything is worked out.`}
+          />
+        )}
         <Button
           label={existing ? `Save as version ${existing.version + 1}` : 'Work out the balances'}
-          disabled={missing > 0}
+          disabled={missing > 0 || unconfirmed > 0}
           onPress={settle}
         />
       </View>

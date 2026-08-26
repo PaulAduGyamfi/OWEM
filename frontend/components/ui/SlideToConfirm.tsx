@@ -20,12 +20,15 @@ const PAD = 4;
  * the gesture is an affordance, not the only path.
  */
 export function SlideToConfirm({
-  label, doneLabel = 'Done', onConfirm, width,
+  label, doneLabel = 'Done', onConfirm, width, disabled = false,
 }: {
   label: string;
   doneLabel?: string;
   onConfirm: () => void;
   width: number;
+  /** When the action is not available the control greys out and refuses the
+   *  gesture — it never reports success for something it did not do. */
+  disabled?: boolean;
 }) {
   const c = useColors();
   const [done, setDone] = useState(false);
@@ -33,6 +36,7 @@ export function SlideToConfirm({
   const x = useSharedValue(0);
 
   const finish = () => {
+    if (disabled) return;
     haptics.commit();
     setDone(true);
     // Success morphs to a checkmark for 800ms before it hands over.
@@ -40,7 +44,7 @@ export function SlideToConfirm({
   };
 
   const drag = Gesture.Pan()
-    .enabled(!done)
+    .enabled(!done && !disabled)
     .onChange((e) => {
       x.value = Math.min(travel, Math.max(0, x.value + e.changeX));
     })
@@ -61,12 +65,13 @@ export function SlideToConfirm({
       accessibilityRole="button"
       accessibilityLabel={label}
       accessibilityHint="Double tap to confirm, or slide the control"
+      accessibilityState={{ disabled }}
       onAccessibilityTap={finish}
       style={{
         width,
         height: TRACK_HEIGHT,
         borderRadius: radius.full,
-        backgroundColor: done ? c.positive : c.accent,
+        backgroundColor: done ? c.positive : disabled ? c.surfaceAlt : c.accent,
         padding: PAD,
         justifyContent: 'center',
       }}
@@ -84,7 +89,9 @@ export function SlideToConfirm({
               labelStyle,
             ]}
           >
-            <Txt variant="bodyStrong" style={{ color: c.accentInk }}>{label}</Txt>
+            <Txt variant="bodyStrong" style={{ color: disabled ? c.inkTertiary : c.accentInk }}>
+              {label}
+            </Txt>
           </Animated.View>
           <GestureDetector gesture={drag}>
             <Animated.View
@@ -93,7 +100,7 @@ export function SlideToConfirm({
                   width: THUMB,
                   height: THUMB,
                   borderRadius: radius.full,
-                  backgroundColor: c.surface,
+                  backgroundColor: disabled ? c.border : c.surface,
                   alignItems: 'center',
                   justifyContent: 'center',
                   shadowColor: '#000',
@@ -104,7 +111,7 @@ export function SlideToConfirm({
                 thumbStyle,
               ]}
             >
-              <Icon name="arrowRight" size={22} color={c.ink} strokeWidth={2} />
+              <Icon name="arrowRight" size={22} color={disabled ? c.inkTertiary : c.ink} strokeWidth={2} />
             </Animated.View>
           </GestureDetector>
         </>

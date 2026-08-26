@@ -100,10 +100,21 @@ export function summarise(s: State, eventId: string): EventSummary {
   const settlement = latestSettlement(s, eventId);
   const payer = payerOf(s, eventId);
 
-  const owedToPayer = settlement
-    ? sum(settlement.lines.filter((l) => l.participantId !== payer?.id).map((l) => l.amountOwed))
-    : ZERO;
+  const owing = settlement
+    ? settlement.lines.filter((l) => l.participantId !== payer?.id)
+    : [];
+
+  const owedToPayer = sum(owing.map((l) => l.amountOwed));
   const collected = sum(paymentsOf(s, eventId).map((p) => p.amount));
+
+  /**
+   * Outstanding is clamped PER PERSON, never on the event total. Clamping the
+   * total would let one person's overpayment cancel another person's debt and
+   * mark the event settled while people still owe.
+   */
+  const outstanding = sum(
+    owing.map((l) => cents(Math.max(0, l.amountOwed - paidBy(s, eventId, l.participantId)))),
+  );
 
   return {
     event,
@@ -112,7 +123,7 @@ export function summarise(s: State, eventId: string): EventSummary {
     total: settlement?.totalAmount ?? receiptOf(s, eventId)?.total ?? ZERO,
     owedToPayer,
     collected,
-    outstanding: cents(Math.max(0, owedToPayer - collected)),
+    outstanding,
     settlement,
   };
 }
@@ -331,10 +342,11 @@ export function createPayment(
   };
   const next = { ...s, payments: [...s.payments, payment] };
   const after = summarise(next, eventId);
+  const done = after.settlement !== null && after.outstanding === 0;
   return {
     ...next,
     events: next.events.map((e) =>
-      e.id === eventId && after.outstanding === 0 ? { ...e, status: 'SETTLED', updatedAt: now() } : e,
+      e.id === eventId && done ? { ...e, status: 'SETTLED', updatedAt: now() } : e,
     ),
   };
 }

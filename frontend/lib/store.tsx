@@ -23,6 +23,9 @@ type Actions = {
   confirmReceipt: (receiptId: string) => void;
   putAssignments: (itemId: string, on: { participantId: string; weight: number }[]) => void;
   createSettlement: (eventId: string, reason?: string | null) => void;
+  /** Set when the engine refused the inputs. Cleared on the next attempt. */
+  lastError: string | null;
+  clearError: () => void;
   createPayment: (eventId: string, participantId: string, amount: Cents, method: PaymentMethod) => void;
   closeEvent: (eventId: string) => void;
   reset: () => void;
@@ -34,6 +37,7 @@ const StoreContext = createContext<Store | null>(null);
 
 export function StoreProvider({ children }: { children: ReactNode }) {
   const [s, setS] = useState<api.State>(api.initialState);
+  const [lastError, setLastError] = useState<string | null>(null);
 
   const value = useMemo<Store>(
     () => ({
@@ -61,13 +65,28 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       setCharges: (receiptId, input) => setS((p) => api.setCharges(p, receiptId, input)),
       confirmReceipt: (receiptId) => setS((p) => api.confirmReceipt(p, receiptId)),
       putAssignments: (itemId, on) => setS((p) => api.putAssignments(p, itemId, on)),
-      createSettlement: (eventId, reason = null) => setS((p) => api.createSettlement(p, eventId, reason)),
+      lastError,
+      clearError: () => setLastError(null),
+      /**
+       * The engine throws by design when its inputs are not confirmed. Run it
+       * outside the updater so the throw lands here and not in React's render
+       * phase, where it would take the whole screen down.
+       */
+      createSettlement: (eventId, reason = null) => {
+        try {
+          const next = api.createSettlement(s, eventId, reason);
+          setLastError(null);
+          setS(next);
+        } catch (e) {
+          setLastError(e instanceof Error ? e.message : 'The balances could not be worked out.');
+        }
+      },
       createPayment: (eventId, pid, amount, method) =>
         setS((p) => api.createPayment(p, eventId, pid, amount, method)),
       closeEvent: (eventId) => setS((p) => api.closeEvent(p, eventId)),
-      reset: () => setS(api.initialState()),
+      reset: () => { setLastError(null); setS(api.initialState()); },
     }),
-    [s],
+    [s, lastError],
   );
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;

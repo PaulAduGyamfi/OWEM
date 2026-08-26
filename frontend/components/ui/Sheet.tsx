@@ -1,6 +1,6 @@
 import { type ReactNode, useEffect } from 'react';
 import { Modal, useWindowDimensions, View } from 'react-native';
-import { Gesture, GestureDetector } from 'react-native-gesture-handler';
+import { Gesture, GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler';
 import Animated, {
   ReduceMotion, runOnJS, useAnimatedStyle, useSharedValue, withSpring, withTiming,
 } from 'react-native-reanimated';
@@ -70,7 +70,10 @@ export function Sheet({
 
   return (
     <Modal visible={open} transparent animationType="none" onRequestClose={dismiss} statusBarTranslucent>
-      <View style={{ flex: 1, justifyContent: 'flex-end' }}>
+      {/* On Android a Modal is its own native root, outside the app's
+          GestureHandlerRootView, so the drag handle below needs one of its own
+          or it silently never recognises the pan. */}
+      <GestureHandlerRootView style={{ flex: 1, justifyContent: 'flex-end' }}>
         <Animated.View style={[{ ...StyleSheetAbsolute, backgroundColor: c.scrim }, scrimStyle]}>
           <Press onPress={dismiss} haptic="none" style={{ flex: 1 }}><View style={{ flex: 1 }} /></Press>
         </Animated.View>
@@ -130,7 +133,7 @@ export function Sheet({
 
           <View style={{ flex: 1, paddingHorizontal: space[5] }}>{children}</View>
         </Animated.View>
-      </View>
+      </GestureHandlerRootView>
     </Modal>
   );
 }

@@ -110,16 +110,23 @@ export default function Events() {
             {events.map((e) => {
               const summary = api.summarise(s, e.id);
               const names = summary.participants.map((p) => p.displayName);
-              const settled = summary.outstanding === 0;
+              // No settlement means it has not been worked out yet — that is a
+              // draft, not "settled".
+              const worked = summary.settlement !== null;
+              const settled = worked && summary.outstanding === 0;
               return (
                 <Row
                   key={e.id}
                   height={76}
                   onPress={() =>
-                    router.push({
-                      pathname: settled ? '/event/[id]/settlement' : '/event/[id]/collect',
-                      params: { id: e.id },
-                    })
+                    router.push(
+                      !worked
+                        ? { pathname: '/event/[id]/participants', params: { id: e.id } }
+                        : {
+                            pathname: settled ? '/event/[id]/settlement' : '/event/[id]/collect',
+                            params: { id: e.id },
+                          },
+                    )
                   }
                 >
                   <AvatarStack names={names} payerName={summary.participants.find((p) => p.isPayer)?.displayName} />
@@ -132,8 +139,8 @@ export default function Events() {
                   <View style={{ alignItems: 'flex-end', gap: space[1] }}>
                     <Money value={summary.outstanding} color={settled ? 'inkSecondary' : 'ink'} />
                     <Badge
-                      label={settled ? 'Settled' : 'Collecting'}
-                      tone={settled ? 'positive' : 'warning'}
+                      label={!worked ? 'Draft' : settled ? 'Settled' : 'Collecting'}
+                      tone={!worked ? 'neutral' : settled ? 'positive' : 'warning'}
                     />
                   </View>
                 </Row>

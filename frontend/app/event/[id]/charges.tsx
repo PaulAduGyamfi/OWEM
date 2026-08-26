@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -32,6 +32,18 @@ export default function Charges() {
   const total = cents(subtotal + tax + tip);
   const percent = subtotal > 0 ? Math.round((tip / subtotal) * 100) : 0;
 
+  /** Folds each pan frame into the latest tip, so none are lost in a batch. */
+  const adjustTip = useCallback(
+    (deltaPercentPoints: number) => {
+      setTip((prev) => {
+        const pct = (prev / Math.max(1, subtotal)) * 100 + deltaPercentPoints;
+        const clamped = Math.max(0, Math.min(40, pct));
+        return cents(Math.round((subtotal * clamped) / 100));
+      });
+    },
+    [subtotal],
+  );
+
   const line = (label: string, value: Cents, strong = false) => (
     <View
       style={{
@@ -55,7 +67,7 @@ export default function Charges() {
       <View style={{ paddingTop: space[6], gap: space[4] }}>
         <Txt variant="caption" color="inkSecondary" style={{ paddingHorizontal: space[4] }}>TIP</Txt>
 
-        <TipRuler subtotal={subtotal} value={tip} onChange={setTip} />
+        <TipRuler subtotal={subtotal} onAdjust={adjustTip} />
 
         <View style={{ alignItems: 'center', gap: space[1] }}>
           <Txt variant="displayXl" tnum>{formatMoney(tip)}</Txt>
