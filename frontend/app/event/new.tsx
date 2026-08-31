@@ -23,9 +23,9 @@ export default function NewEvent() {
   const [title, setTitle] = useState('');
   const [place, setPlace] = useState('');
 
-  const go = () => {
-    const id = createEvent({ title: title.trim() || "Dinner at Rosati's", place: place.trim() || null });
-    router.push({ pathname: '/event/[id]/participants', params: { id } });
+  const go = async () => {
+    const id = await createEvent(title.trim() || "Dinner at Rosati's", place.trim() || null);
+    if (id) router.push({ pathname: '/event/[id]/participants', params: { id } });
   };
 
   return (

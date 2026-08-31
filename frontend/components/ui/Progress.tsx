@@ -19,7 +19,6 @@ export function ProgressBar({ value, tint }: { value: number; tint?: string }) {
   );
 }
 
-/** A line the model is still reading. */
 export function Skeleton({ width, height = 10 }: { width: number | `${number}%`; height?: number }) {
   const c = useColors();
   const o = useSharedValue(0.5);

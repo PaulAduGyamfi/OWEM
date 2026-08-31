@@ -1,13 +1,3 @@
-/**
- * OWEM design tokens.
- * Colour comes from docs/OWEM Color Palette.md (v4, iOS-leaning, lime accent).
- * Geometry, type and motion come from docs/design-system.md (Orbit).
- *
- * Two rules the palette makes non-negotiable, enforced by how these are named:
- *   1. `accent` is a SURFACE, never a text colour. There is no `accentText`.
- *   2. Status colours only ever mean money direction or state, on their soft pill.
- */
-
 export const palette = {
   light: {
     bg: '#F2F2F7',
@@ -64,12 +54,10 @@ export const palette = {
 export type Colors = typeof palette.light;
 export type ColorName = keyof Colors;
 
-/** 4pt base grid. */
 export const space = { 1: 4, 2: 8, 3: 12, 4: 16, 5: 20, 6: 24, 8: 32, 10: 40, 12: 48 } as const;
 
 export const radius = { sm: 8, md: 12, lg: 16, xl: 20, xxl: 28, full: 999 } as const;
 
-/** Orbit type scale. Negative tracking above 22px only. */
 export const type = {
   displayXl: { fontSize: 44, lineHeight: 48, fontWeight: '700', letterSpacing: -1.3 },
   displayLg: { fontSize: 34, lineHeight: 40, fontWeight: '700', letterSpacing: -0.7 },
@@ -85,10 +73,8 @@ export const type = {
 
 export type TypeName = keyof typeof type;
 
-/** iOS hairline. The palette asks for 0.5px, not a 1px grey box. */
 export const HAIRLINE = 0.5;
 
-/** Minimum tap target, always. */
 export const TAP = 44;
 
 export const motion = {
@@ -98,7 +84,6 @@ export const motion = {
   hero: 600,
 } as const;
 
-/** Reanimated spring matching Orbit's ease-sheet feel. Nothing overshoots. */
 export const springs = {
   press: { damping: 30, stiffness: 420, mass: 0.6 },
   sheet: { damping: 34, stiffness: 260, mass: 0.9 },

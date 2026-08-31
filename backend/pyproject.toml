@@ -1,0 +1,61 @@
+[project]
+name = "owem"
+version = "0.1.0"
+description = "OWEM — group expense settlement. Deterministic money, AI only where the input is genuinely ambiguous."
+requires-python = ">=3.12"
+dependencies = [
+  "fastapi>=0.115",
+  "uvicorn[standard]>=0.32",
+  "sqlalchemy>=2.0",
+  "alembic>=1.14",
+  "psycopg[binary]>=3.2",
+  "pydantic>=2.9",
+  "pydantic-settings>=2.6",
+  "anthropic>=0.69",
+  "python-multipart>=0.0.20",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.3",
+  "httpx>=0.28",
+  "ruff>=0.8",
+  "mypy>=1.13",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["owem"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = [
+  "db: needs a live PostgreSQL (docker compose up -d db)",
+  "live_ai: calls the real Claude API and costs money; deselected by default",
+]
+# Live AI tests are opt-in: pytest -m live_ai
+addopts = "-q --strict-markers -m 'not live_ai'"
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+# Alembic writes these; they are a record of what ran, not code we hand-edit.
+extend-exclude = ["owem/migrations/versions"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "TID", "RUF"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["owem"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+plugins = ["pydantic.mypy"]
+
+[[tool.mypy.overrides]]
+module = "tests.*"
+disallow_untyped_defs = false

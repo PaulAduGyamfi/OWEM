@@ -7,17 +7,12 @@ import { initials } from '@/lib/format.ts';
 import { radius, space, springs, useColors } from '@/theme';
 import { Txt } from './Txt';
 
-/**
- * Participants are grey; only the payer is inked. Colour on a person would
- * read as a status, and status is reserved for money.
- */
 export function Avatar({
   name, size = 40, payer = false, ring, style,
 }: {
   name: string;
   size?: number;
   payer?: boolean;
-  /** Surface colour to ring against, for overlapping stacks. */
   ring?: string;
   style?: ViewStyle;
 }) {
@@ -51,7 +46,6 @@ export function Avatar({
   );
 }
 
-/** Overlapping row: −12px overlap, max 4 visible, then +N. */
 export function AvatarStack({
   names, size = 32, max = 3, payerName,
 }: {
@@ -103,14 +97,10 @@ export function AvatarStack({
   );
 }
 
-/** Runs once per session. Repeating it on every navigation turns a delight
- *  into a tax. */
 let clusterHasAssembled = false;
 
 type Blob = { name: string; size: number; x: number; y: number; ring: number };
 
-/** Two to three concentric rings with organic jitter — a perfect ring reads as
- *  a loading spinner. */
 function bloom(names: string[], width: number, height: number): Blob[] {
   const cx = width / 2;
   const cy = height / 2;
@@ -127,8 +117,6 @@ function bloom(names: string[], width: number, height: number): Blob[] {
     const ring = Math.min(ringsFor, Math.floor(idx / perRing) + 1);
     const inRing = idx % perRing;
     const count = Math.min(perRing, names.length - 1 - (ring - 1) * perRing);
-    // 8–14° of angular offset and ±6px radially, derived from the index so the
-    // layout is stable across renders.
     const jitterA = (((i * 37) % 13) - 6) * (Math.PI / 180);
     const jitterR = ((i * 53) % 13) - 6;
     const angle = (inRing / Math.max(1, count)) * Math.PI * 2 + jitterA + ring * 0.7;
@@ -151,7 +139,6 @@ function ClusterBlob({ blob, order, payerName }: { blob: Blob; order: number; pa
 
   useEffect(() => {
     if (clusterHasAssembled) return;
-    // Centre ring outward, 30ms apart.
     scale.value = withDelay(order * 30, withSpring(1, { ...springs.hero, reduceMotion: ReduceMotion.System }));
     opacity.value = withDelay(order * 30, withSpring(1, { ...springs.hero, reduceMotion: ReduceMotion.System }));
   }, [order, scale, opacity]);

@@ -1,25 +1,18 @@
-/**
- * Mirrors docs/architecture/data-model.md one-for-one.
- * Money is WHOLE CENTS everywhere in this app. Never float, never a dollar number.
- */
+export type Cents = number & { readonly __cents: unique symbol };
 
 export type Provenance = 'AI_SUGGESTED' | 'USER_CONFIRMED' | 'SYSTEM_COMPUTED';
 export type EventStatus = 'DRAFT' | 'COLLECTING' | 'SETTLED' | 'CLOSED';
-export type ReceiptState = 'DRAFT' | 'EXTRACTING' | 'NEEDS_REVIEW' | 'CONFIRMED';
+export type ReceiptState = 'DRAFT' | 'NEEDS_REVIEW' | 'CONFIRMED';
 export type TipPolicy = 'PROPORTIONAL' | 'EQUAL';
 export type PaymentMethod = 'venmo' | 'cashapp' | 'zelle' | 'applecash' | 'cash' | 'other';
 
-/** Whole cents. Branded so a dollar number can never be passed by mistake. */
-export type Cents = number & { readonly __cents: unique symbol };
-
-export type GroupEvent = {
+export type Event = {
   id: string;
   title: string;
   place: string | null;
-  currency: 'USD';
+  currency: string;
   status: EventStatus;
   occurredAt: string;
-  updatedAt: string;
 };
 
 export type Participant = {
@@ -27,7 +20,25 @@ export type Participant = {
   eventId: string;
   displayName: string;
   isPayer: boolean;
-  contactHandle: string | null;
+};
+
+export type ReceiptItem = {
+  id: string;
+  receiptId: string;
+  lineNumber: number;
+  rawName: string;
+  normalizedName: string;
+  quantity: number;
+  totalPrice: Cents;
+  provenance: Provenance;
+  confidence: number | null;
+};
+
+export type Assignment = {
+  id: string;
+  itemId: string;
+  participantId: string;
+  weight: number;
 };
 
 export type Receipt = {
@@ -41,29 +52,6 @@ export type Receipt = {
   total: Cents;
   tipPolicy: TipPolicy;
   taxProvenance: Provenance;
-  confirmedAt: string | null;
-};
-
-export type ReceiptItem = {
-  id: string;
-  receiptId: string;
-  lineNumber: number;
-  rawName: string;
-  normalizedName: string;
-  quantity: number;
-  totalPrice: Cents;
-  provenance: Provenance;
-  /** 0–1, null unless a model produced it. */
-  confidence: number | null;
-};
-
-export type ItemAssignment = {
-  id: string;
-  itemId: string;
-  participantId: string;
-  /** "Paul had two of the three beers" — weights keep the maths uniform. */
-  weight: number;
-  provenance: Provenance;
 };
 
 export type SettlementLine = {
@@ -75,16 +63,14 @@ export type SettlementLine = {
   amountOwed: Cents;
 };
 
-/** INVARIANT 3: never updated. A correction writes version + 1. */
 export type Settlement = {
   id: string;
   eventId: string;
   version: number;
   totalAmount: Cents;
   engineVersion: string;
-  createdAt: string;
-  /** Why this version exists. Null on version 1. */
   reason: string | null;
+  createdAt: string;
   lines: SettlementLine[];
 };
 
@@ -94,8 +80,24 @@ export type Payment = {
   participantId: string;
   amount: Cents;
   method: PaymentMethod;
-  externalRef: string | null;
   recordedAt: string;
+};
+
+export type EventDetail = Event & {
+  participants: Participant[];
+  receipt: Receipt | null;
+  items: ReceiptItem[];
+  assignments: Assignment[];
+  payments: Payment[];
+  settlementVersion: number | null;
+};
+
+export type Extraction = {
+  receipt: Receipt;
+  items: ReceiptItem[];
+  needsReview: number[];
+  problems: string[];
+  merchant: string | null;
 };
 
 export const PAYMENT_METHOD_LABEL: Record<PaymentMethod, string> = {
@@ -106,3 +108,5 @@ export const PAYMENT_METHOD_LABEL: Record<PaymentMethod, string> = {
   cash: 'Cash',
   other: 'Other',
 };
+
+export const CONFIDENCE_FLOOR = 0.85;

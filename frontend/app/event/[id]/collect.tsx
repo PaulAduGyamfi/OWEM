@@ -4,7 +4,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { cents, formatMoney } from '@/lib/money.ts';
 import { formatShortDay } from '@/lib/format.ts';
-import { api, useEvent, useOwem } from '@/lib/store';
+import { paidBy, useEvent, useOwem } from '@/lib/store';
 import { PAYMENT_METHOD_LABEL } from '@/lib/types.ts';
 import { radius, space, useColors, useTheme } from '@/theme';
 import { Avatar } from '@/components/ui/Avatar';
@@ -40,11 +40,10 @@ export default function Collect() {
 
   const rows = settlement.lines
     .filter((l) => l.participantId !== payer?.id)
-    // A line can outlive its participant, so drop any whose person is gone.
     .map((l) => {
       const person = participants.find((p) => p.id === l.participantId);
       if (!person) return null;
-      const paid = api.paidBy(s, id, l.participantId);
+      const paid = paidBy(s, id, l.participantId);
       const last = payments.filter((p) => p.participantId === l.participantId).at(-1);
       return { person, owed: l.amountOwed, paid, left: cents(Math.max(0, l.amountOwed - paid)), last };
     })

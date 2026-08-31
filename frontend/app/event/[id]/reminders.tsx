@@ -4,7 +4,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { cents, formatMoney } from '@/lib/money.ts';
 import { formatShortDay } from '@/lib/format.ts';
-import { api, useEvent, useOwem } from '@/lib/store';
+import { paidBy, useEvent, useOwem } from '@/lib/store';
 import { radius, space, useColors } from '@/theme';
 import { Avatar } from '@/components/ui/Avatar';
 import { Badge, Chip } from '@/components/ui/Badge';
@@ -19,11 +19,6 @@ import { Banner } from '@/components/owem/Provenance';
 
 type Tone = 'Friendly' | 'Direct' | 'Playful';
 
-/**
- * The Reminder agent may read balances and draft text. It cannot move money,
- * change a debt, mark anyone paid, or send without approval — and those limits
- * live in the code that runs the tool, not in the prompt.
- */
 function draft(tone: Tone, name: string, amount: string, event: string, when: string): string {
   if (tone === 'Direct') {
     return `Hi ${name} — your share of ${event} on ${when} was ${amount}. Venmo or Cash App both work. Thanks!`;
@@ -51,7 +46,7 @@ export default function Reminders() {
       .map((l) => {
         const person = participants.find((p) => p.id === l.participantId);
         if (!person) return null;
-        const left = cents(Math.max(0, l.amountOwed - api.paidBy(s, id, l.participantId)));
+        const left = cents(Math.max(0, l.amountOwed - paidBy(s, id, l.participantId)));
         return { person, left };
       })
       .filter((r): r is NonNullable<typeof r> => r !== null && r.left > 0);

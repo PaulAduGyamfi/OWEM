@@ -12,11 +12,6 @@ import { Icon } from '@/components/ui/Icon';
 import { Screen } from '@/components/ui/Screen';
 import { Txt } from '@/components/ui/Txt';
 
-/**
- * INVARIANT 3, on screen. A settlement row is never updated: a correction
- * writes version + 1, and the old one stays exactly as it was sent — because
- * once you have told people what they owe, that is a promise.
- */
 export default function History() {
   const c = useColors();
   const { id } = useLocalSearchParams<{ id: string }>();

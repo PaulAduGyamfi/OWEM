@@ -6,25 +6,14 @@ import { radius, space, useColors } from '@/theme';
 
 const TICKS = 29;
 
-/**
- * A tick ruler above the figure: hairlines, every fifth taller, the centre tick
- * inked to mark the current value. Drag to adjust; tap the figure to type one.
- */
 export function TipRuler({
   subtotal, onAdjust,
 }: {
   subtotal: Cents;
-  /**
-   * Reports a DELTA in percentage points, not a value. The pan fires many times
-   * per JS tick, so the parent must fold each one into the latest state itself —
-   * computing a new total from a value captured in this render would drop every
-   * frame but the last.
-   */
   onAdjust: (deltaPercentPoints: number) => void;
 }) {
   const c = useColors();
 
-  // ~6px of travel per percentage point, so a full drag covers roughly 0–40%.
   const report = (dx: number) => onAdjust(dx / 6);
 
   const drag = Gesture.Pan().onChange((e) => {

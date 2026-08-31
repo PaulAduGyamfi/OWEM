@@ -1,16 +1,12 @@
 import { View } from 'react-native';
 import { formatMoney } from '@/lib/money.ts';
 import type { ReceiptItem } from '@/lib/types.ts';
-import { CONFIDENCE_FLOOR } from '@/lib/mock.ts';
+import { CONFIDENCE_FLOOR } from '@/lib/types.ts';
 import { radius, space, useColors } from '@/theme';
 import { Row } from '@/components/ui/Card';
 import { Txt } from '@/components/ui/Txt';
 import { ProvenanceBadge } from './Provenance';
 
-/**
- * The printed name sits under the interpreted one, so a dispute has an answer —
- * and so we can tell "did it read it right" apart from "did it interpret it right".
- */
 export function ItemRow({ item, onPress }: { item: ReceiptItem; onPress?: () => void }) {
   const c = useColors();
   const lowConfidence = item.confidence !== null && item.confidence < CONFIDENCE_FLOOR;

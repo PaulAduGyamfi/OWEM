@@ -1,7 +1,6 @@
 import { ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { api, useOwem } from '@/lib/store';
-import { ENGINE_VERSION } from '@/lib/settlement.ts';
+import { totalOutstanding, useOwem } from '@/lib/store';
 import { space, useColors, useTheme } from '@/theme';
 import { Avatar } from '@/components/ui/Avatar';
 import { Chip } from '@/components/ui/Badge';
@@ -15,10 +14,10 @@ import { Banner } from '@/components/owem/Provenance';
 export default function Profile() {
   const c = useColors();
   const { pref, setPref } = useTheme();
-  const { s, reset } = useOwem();
+  const { s, refresh } = useOwem();
   const insets = useSafeAreaInsets();
 
-  const collected = api.totalOutstanding(s);
+  const collected = totalOutstanding(s);
   const events = s.events.length;
 
   return (
@@ -47,7 +46,7 @@ export default function Profile() {
           </Row>
           <Row>
             <Txt variant="callout" color="inkSecondary" style={{ flex: 1 }}>Settlement engine</Txt>
-            <Txt variant="footnote" color="inkTertiary">{ENGINE_VERSION}</Txt>
+            <Txt variant="footnote" color="inkTertiary">{s.settlements[s.events[0]?.id ?? '']?.engineVersion ?? '—'}</Txt>
           </Row>
         </Grouped>
 
@@ -63,11 +62,11 @@ export default function Profile() {
         <View style={{ gap: space[3] }}>
           <Txt variant="caption" color="inkSecondary">PROTOTYPE</Txt>
           <Grouped inset={space[4]}>
-            <Row onPress={reset}>
+            <Row onPress={() => void refresh()}>
               <Icon name="refresh" size={20} color={c.ink} />
               <View style={{ flex: 1 }}>
-                <Txt variant="bodyStrong">Start the demo over</Txt>
-                <Txt variant="footnote" color="inkSecondary">Puts every event back to how a tester finds it</Txt>
+                <Txt variant="bodyStrong">Reload from the server</Txt>
+                <Txt variant="footnote" color="inkSecondary">Fetches every event again</Txt>
               </View>
             </Row>
           </Grouped>

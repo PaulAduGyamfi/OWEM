@@ -6,8 +6,6 @@ import { Icon } from './Icon';
 import { Press } from './Pressable';
 import { Txt } from './Txt';
 
-/** Chrome floats, content scrolls. The header is just a back affordance and
- *  whatever context belongs on the right. */
 export function Header({
   right, onBack, close = false, tint,
 }: {
@@ -50,7 +48,6 @@ export function StepLabel({ step, of }: { step: number; of: number }) {
   return <Txt variant="callout" color="inkSecondary">Step {step} of {of}</Txt>;
 }
 
-/** The page hero. Title-1, with an optional line underneath. */
 export function Title({ text, sub }: { text: string; sub?: string }) {
   return (
     <View style={{ paddingHorizontal: space[4], gap: space[1] + 2 }}>

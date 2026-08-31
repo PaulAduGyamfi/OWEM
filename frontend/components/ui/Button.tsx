@@ -4,11 +4,6 @@ import { Icon, type IconName } from './Icon';
 import { Press } from './Pressable';
 import { Txt } from './Txt';
 
-/**
- * One lime per screen — that is the `primary` variant, and it belongs to the
- * single action the user came to take. Everything else is ink or quieter.
- * When the action is not available it goes grey; it never sits there in lime.
- */
 export type ButtonVariant = 'primary' | 'ink' | 'secondary' | 'tertiary' | 'ghost';
 
 export function Button({
@@ -76,7 +71,6 @@ export function Button({
   );
 }
 
-/** A row of buttons where only the last one may be lime. */
 export function ButtonRow({ children }: { children: React.ReactNode }) {
   return <View style={{ flexDirection: 'row', gap: space[3] }}>{children}</View>;
 }

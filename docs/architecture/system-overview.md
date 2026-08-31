@@ -24,7 +24,7 @@ Phone / web app (Expo, React Native, TypeScript)
 
           |
 
-API (ASP.NET Core, C#)
+API (python)
          
          |
          +--> PostgreSQL (all data)

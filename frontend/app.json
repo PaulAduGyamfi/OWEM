@@ -40,6 +40,18 @@
           "resizeMode": "contain",
           "backgroundColor": "#C9F31D"
         }
+      ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "OWEM uses the camera to photograph a receipt. The photo goes to your own server and nowhere else."
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "OWEM needs your photo library so you can pick a receipt you already took."
+        }
       ]
     ],
     "experiments": {

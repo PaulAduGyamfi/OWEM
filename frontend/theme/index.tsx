@@ -28,7 +28,6 @@ export function useTheme(): ThemeValue {
   return v;
 }
 
-/** Shorthand for the common case: just the colours. */
 export function useColors(): Colors {
   return useTheme().c;
 }

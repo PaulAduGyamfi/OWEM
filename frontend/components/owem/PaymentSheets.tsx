@@ -15,7 +15,6 @@ import { Txt } from '@/components/ui/Txt';
 
 const RAILS: PaymentMethod[] = ['venmo', 'cashapp', 'zelle', 'applecash', 'cash'];
 
-/** Deep links we hand off to. OWEM composes the request; the rail moves the money. */
 const DEEP_LINK: Record<PaymentMethod, ((amount: string, note: string) => string) | null> = {
   venmo: (a, n) => `venmo://paycharge?txn=charge&amount=${a}&note=${encodeURIComponent(n)}`,
   cashapp: (a) => `https://cash.app/$/${a}`,
@@ -68,11 +67,6 @@ function RailPicker({
   );
 }
 
-/**
- * The handoff. OWEM composes a pre-filled request and opens the rail the person
- * already uses. Money never moves inside OWEM — no processor, no bank feed —
- * so the payer confirms what happened when it lands.
- */
 export function RequestSheet({
   participant, amount, eventTitle, open, onClose, onSeeBreakdown,
 }: {
@@ -139,7 +133,6 @@ export function RequestSheet({
   );
 }
 
-/** Recording a payment changes what somebody owes, so it drags to commit. */
 export function RecordPaymentSheet({
   participant, owed, open, onClose, onRecord, width,
 }: {

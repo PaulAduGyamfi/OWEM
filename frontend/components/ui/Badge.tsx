@@ -6,7 +6,6 @@ import { Txt } from './Txt';
 
 export type Tone = 'neutral' | 'positive' | 'warning' | 'negative' | 'accent' | 'ink';
 
-/** Status badge: 24 high, caption, tinted fill with the -text variant on it. */
 export function Badge({ label, tone = 'neutral', icon }: { label: string; tone?: Tone; icon?: ReactNode }) {
   const c = useColors();
   const map: Record<Tone, [string, string]> = {
@@ -37,7 +36,6 @@ export function Badge({ label, tone = 'neutral', icon }: { label: string; tone?:
   );
 }
 
-/** Filter chip: 36 high, fully rounded. Selected inverts to ink. */
 export function Chip({
   label, selected, onPress, icon, style, flex,
 }: {

@@ -4,7 +4,6 @@ import { Icon } from './Icon';
 import { Press } from './Pressable';
 import { Txt } from './Txt';
 
-/** "Paul had two of the three beers" — the control behind a weight. */
 export function Stepper({
   value, onChange, min = 1, max = 12,
 }: {

@@ -36,7 +36,6 @@ test('$0.01 across three people still sums', () => {
 });
 
 test('weights carry a bigger share', () => {
-  // Paul had two of the three beers.
   const parts = allocate(cents(2100), [2, 1]);
   assert.deepEqual(parts, [1400, 700]);
 });

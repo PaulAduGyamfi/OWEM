@@ -3,7 +3,7 @@ import { ScrollView, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { allocate, formatMoney } from '@/lib/money.ts';
-import { api, useEvent, useOwem } from '@/lib/store';
+import { assignmentsOf, latestSettlement, useEvent, useOwem } from '@/lib/store';
 import { space, useColors } from '@/theme';
 import { AvatarStack } from '@/components/ui/Avatar';
 import { Button } from '@/components/ui/Button';
@@ -27,12 +27,9 @@ export default function Assign() {
   const { items, participants, receipt } = useEvent(id);
   const [open, setOpen] = useState<string | null>(null);
 
-  const assignedCount = items.filter((i) => api.assignmentsOf(s, i.id).length > 0).length;
+  const assignedCount = items.filter((i) => assignmentsOf(s, id, i.id).length > 0).length;
   const missing = items.length - assignedCount;
 
-  // INVARIANT 1 guards the engine by throwing. This screen must never let the
-  // user reach that throw: an unconfirmed line means going back to review,
-  // not a crash.
   const unconfirmed =
     items.filter((i) => i.provenance === 'AI_SUGGESTED').length +
     (receipt?.taxProvenance === 'AI_SUGGESTED' ? 1 : 0);
@@ -40,14 +37,13 @@ export default function Assign() {
   const payerName = participants.find((p) => p.isPayer)?.displayName;
 
   const everyone = (itemId: string) =>
-    putAssignments(itemId, participants.map((p) => ({ participantId: p.id, weight: 1 })));
+    putAssignments(id, itemId, participants.map((p) => ({ participantId: p.id, weight: 1 })));
 
-  // Re-settling after an edit writes a NEW version; it never rewrites the old one.
-  const existing = api.latestSettlement(s, id);
-  const settle = () => {
+  const existing = latestSettlement(s, id);
+  const settle = async () => {
     if (missing > 0 || unconfirmed > 0) return;
-    if (receipt) confirmReceipt(receipt.id);
-    createSettlement(id, existing ? 'You changed who was on a line.' : null);
+    if (receipt) await confirmReceipt(id, receipt.id);
+    await createSettlement(id, existing ? 'You changed who was on a line.' : null);
     router.push({ pathname: '/event/[id]/settlement', params: { id } });
   };
 
@@ -68,7 +64,7 @@ export default function Assign() {
             label="Just me"
             onPress={() => {
               const payer = participants.find((p) => p.isPayer);
-              if (payer) items.forEach((i) => putAssignments(i.id, [{ participantId: payer.id, weight: 1 }]));
+              if (payer) items.forEach((i) => putAssignments(id, i.id, [{ participantId: payer.id, weight: 1 }]));
             }}
           />
         </View>
@@ -81,7 +77,7 @@ export default function Assign() {
       >
         <Grouped inset={space[4]}>
           {items.map((i) => {
-            const on = api.assignmentsOf(s, i.id);
+            const on = assignmentsOf(s, id, i.id);
             const names = on
               .map((a) => participants.find((p) => p.id === a.participantId)?.displayName ?? '?')
               .filter(Boolean);
@@ -151,11 +147,11 @@ export default function Assign() {
       <AssignSheet
         item={item}
         participants={participants}
-        current={item ? api.assignmentsOf(s, item.id) : []}
+        current={item ? assignmentsOf(s, id, item.id) : []}
         open={item !== null}
         onClose={() => setOpen(null)}
         onSave={(on) => {
-          if (open) putAssignments(open, on);
+          if (open) void putAssignments(id, open, on);
           setOpen(null);
         }}
       />

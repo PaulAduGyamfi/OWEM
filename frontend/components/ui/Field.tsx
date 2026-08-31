@@ -3,11 +3,6 @@ import { TextInput, View, type KeyboardTypeOptions } from 'react-native';
 import { HAIRLINE, radius, space, useColors, type } from '@/theme';
 import { Txt } from './Txt';
 
-/**
- * Height 48, ink-100 fill, no border at rest. Focus takes a 1.5px INK border:
- * lime is a surface, not a line you can see on white.
- * Errors print what happened and how to fix it, never just "Invalid".
- */
 export function Field({
   label, value, onChangeText, placeholder, error, keyboardType, autoFocus, right, onSubmitEditing,
 }: {

@@ -3,7 +3,6 @@ import { ScrollView, View, type ViewStyle } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { space, useColors } from '@/theme';
 
-/** Screen gutter is 16. Scroll containers clear the floating dock by 96. */
 export const GUTTER = space[4];
 
 export function Screen({
@@ -13,7 +12,6 @@ export function Screen({
   scroll?: boolean;
   bg?: string;
   style?: ViewStyle;
-  /** Extra room under the content for a floating bar or dock. */
   bottomPad?: number;
 }) {
   const c = useColors();

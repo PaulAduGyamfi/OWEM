@@ -2,7 +2,7 @@ import { ScrollView, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { formatShortDay, pluralise } from '@/lib/format.ts';
-import { api, useOwem } from '@/lib/store';
+import { summarise, totalOutstanding, useOwem } from '@/lib/store';
 import { radius, space, useTheme } from '@/theme';
 import { AvatarStack } from '@/components/ui/Avatar';
 import { Badge } from '@/components/ui/Badge';
@@ -16,7 +16,7 @@ import { Banner } from '@/components/owem/Provenance';
 
 export default function Events() {
   const { c, scheme } = useTheme();
-  const { s } = useOwem();
+  const { s, loading } = useOwem();
   const router = useRouter();
   const insets = useSafeAreaInsets();
 
@@ -25,8 +25,8 @@ export default function Events() {
   const cardMuted = scheme === 'dark' ? c.inkSecondary : 'rgba(255,255,255,0.6)';
 
   const events = s.events;
-  const outstanding = api.totalOutstanding(s);
-  const openCount = events.filter((e) => api.summarise(s, e.id).outstanding > 0).length;
+  const outstanding = totalOutstanding(s);
+  const openCount = events.filter((e) => summarise(s, e.id).outstanding > 0).length;
 
   const action = (icon: IconName, label: string, onPress: () => void) => (
     <Press onPress={onPress} style={{ alignItems: 'center', gap: space[2] }}>
@@ -93,7 +93,7 @@ export default function Events() {
           <View style={{ flexDirection: 'row', gap: space[8] - 4, marginTop: space[6] }}>
             {action('plus', 'New event', () => router.push('/event/new'))}
             {action('bell', 'Remind', () => {
-              const first = events.find((e) => api.summarise(s, e.id).outstanding > 0);
+              const first = events.find((e) => summarise(s, e.id).outstanding > 0);
               if (first) router.push({ pathname: '/event/[id]/reminders', params: { id: first.id } });
             })}
             {action('camera', 'Scan', () => router.push('/event/new'))}
@@ -108,10 +108,8 @@ export default function Events() {
 
           <Grouped inset={92}>
             {events.map((e) => {
-              const summary = api.summarise(s, e.id);
+              const summary = summarise(s, e.id);
               const names = summary.participants.map((p) => p.displayName);
-              // No settlement means it has not been worked out yet — that is a
-              // draft, not "settled".
               const worked = summary.settlement !== null;
               const settled = worked && summary.outstanding === 0;
               return (

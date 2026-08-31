@@ -4,7 +4,6 @@ import { type ColorName, type TypeName, type, useColors } from '@/theme';
 type Props = TextProps & {
   variant?: TypeName;
   color?: ColorName;
-  /** Tabular figures, so digits do not shift width as values update. */
   tnum?: boolean;
   center?: boolean;
 };
@@ -28,7 +27,6 @@ export function Txt({
   );
 }
 
-/** An amount. Always tabular, always the loudest thing it is allowed to be. */
 export function Amount({
   variant = 'displayLg', ...rest
 }: Omit<Props, 'tnum'>) {

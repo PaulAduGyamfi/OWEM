@@ -16,8 +16,6 @@ import { Txt } from '@/components/ui/Txt';
 
 const KEYS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '.', '0', 'del'] as const;
 
-/** The path that never needs a model: eight items typed in still gets you exact
- *  tax-proportional balances. */
 export default function ManualEntry() {
   const c = useColors();
   const { id, receiptId } = useLocalSearchParams<{ id: string; receiptId: string }>();
@@ -42,7 +40,7 @@ export default function ManualEntry() {
 
   const add = () => {
     if (!canAdd || parsed === null) return;
-    addItem(receiptId, { name: name.trim(), price: parsed });
+    void addItem(id, receiptId, name.trim(), parsed);
     setName('');
     setDigits('');
   };

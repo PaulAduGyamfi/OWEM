@@ -1,34 +1,85 @@
-import { View } from 'react-native';
+import { useRef, useState } from 'react';
+import { ActivityIndicator, View } from 'react-native';
+import { CameraView, useCameraPermissions } from 'expo-camera';
+import * as ImagePicker from 'expo-image-picker';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useOwem } from '@/lib/store';
 import { palette, radius, space } from '@/theme';
+import { Button } from '@/components/ui/Button';
 import { Header } from '@/components/ui/Header';
 import { Icon } from '@/components/ui/Icon';
 import { Press } from '@/components/ui/Pressable';
 import { Txt } from '@/components/ui/Txt';
 
-const FRAME = { light: '#F5F3EE', line: '#8E8E93', heavy: '#2C2C2E' };
-
-/** A camera screen is always dark, whatever the app's mode is. */
 export default function Capture() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { createReceipt } = useOwem();
+  const camera = useRef<CameraView>(null);
+  const [permission, requestPermission] = useCameraPermissions();
+  const [taking, setTaking] = useState(false);
 
-  const shoot = () => {
-    const receiptId = createReceipt(id);
-    router.replace({ pathname: '/event/[id]/extracting', params: { id, receiptId } });
+  const goExtract = (uri: string) =>
+    router.replace({ pathname: '/event/[id]/extracting', params: { id, photoUri: uri } });
+
+  const shoot = async () => {
+    if (taking) return;
+    setTaking(true);
+    try {
+      const photo = await camera.current?.takePictureAsync({ quality: 0.6, imageType: 'jpg' });
+      if (photo?.uri) goExtract(photo.uri);
+    } finally {
+      setTaking(false);
+    }
   };
 
-  const manual = () => {
-    const receiptId = createReceipt(id);
-    router.replace({ pathname: '/event/[id]/manual', params: { id, receiptId } });
+  const fromLibrary = async () => {
+    const picked = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: 'images',
+      quality: 0.6,
+      allowsEditing: false,
+    });
+    if (!picked.canceled && picked.assets[0]?.uri) goExtract(picked.assets[0].uri);
   };
+
+  if (!permission) {
+    return (
+      <View style={{ flex: 1, backgroundColor: '#000', alignItems: 'center', justifyContent: 'center' }}>
+        <ActivityIndicator color="#FFFFFF" />
+      </View>
+    );
+  }
+
+  if (!permission.granted) {
+    return (
+      <View style={{ flex: 1, backgroundColor: '#000000', paddingTop: insets.top }}>
+        <Header close tint="rgba(255,255,255,0.14)" onBack={() => router.back()} />
+        <View style={{ flex: 1, justifyContent: 'center', paddingHorizontal: space[6], gap: space[4] }}>
+          <Txt variant="title1" style={{ color: '#FFFFFF' }}>
+            OWEM needs the camera
+          </Txt>
+          <Txt variant="body" style={{ color: 'rgba(255,255,255,0.65)' }}>
+            To read a receipt it has to see one. The photo goes to your own server and
+            nowhere else, and it is deleted 30 days after the event closes.
+          </Txt>
+        </View>
+        <View style={{ paddingHorizontal: space[4], paddingBottom: insets.bottom + space[6], gap: space[3] }}>
+          <Button label="Allow the camera" onPress={requestPermission} />
+          <Button label="Type it in instead" variant="secondary" onPress={() =>
+            router.replace({ pathname: '/event/[id]/manual', params: { id } })} />
+        </View>
+      </View>
+    );
+  }
 
   return (
     <View style={{ flex: 1, backgroundColor: '#000000', paddingTop: insets.top }}>
+      <CameraView
+        ref={camera}
+        style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
+        facing="back"
+      />
+
       <Header close tint="rgba(255,255,255,0.14)" onBack={() => router.back()} />
       <Txt
         variant="bodyStrong"
@@ -38,35 +89,9 @@ export default function Capture() {
         Photograph the receipt
       </Txt>
 
+      {/* Framing brackets. */}
       <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-        {/* Stand-in for the camera preview. */}
-        <View
-          style={{
-            width: 200,
-            height: 400,
-            backgroundColor: FRAME.light,
-            transform: [{ rotate: '-1.2deg' }],
-            padding: space[5],
-            gap: 9,
-          }}
-        >
-          <View style={{ height: 10, width: 96, backgroundColor: FRAME.heavy, alignSelf: 'center' }} />
-          <View style={{ height: 6, width: 64, backgroundColor: '#C7C7CC', alignSelf: 'center', marginBottom: space[3] }} />
-          {[88, 74, 96, 60, 84, 70, 92].map((w, i) => (
-            <View key={i} style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-              <View style={{ height: 6, width: w, backgroundColor: FRAME.line }} />
-              <View style={{ height: 6, width: 26, backgroundColor: FRAME.line }} />
-            </View>
-          ))}
-          <View style={{ height: 1, backgroundColor: '#C7C7CC', marginVertical: 6 }} />
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-            <View style={{ height: 8, width: 40, backgroundColor: FRAME.heavy }} />
-            <View style={{ height: 8, width: 44, backgroundColor: FRAME.heavy }} />
-          </View>
-        </View>
-
-        {/* Framing brackets. */}
-        <View style={{ position: 'absolute', width: 302, height: 440 }}>
+        <View style={{ width: 302, height: 440 }}>
           {([
             { top: 0, left: 0, borderTopWidth: 3, borderLeftWidth: 3, borderTopLeftRadius: 8 },
             { top: 0, right: 0, borderTopWidth: 3, borderRightWidth: 3, borderTopRightRadius: 8 },
@@ -92,7 +117,7 @@ export default function Capture() {
         }}
       >
         <Press
-          onPress={shoot}
+          onPress={fromLibrary}
           style={{
             width: 56, height: 56, borderRadius: radius.md,
             backgroundColor: 'rgba(255,255,255,0.14)', alignItems: 'center', justifyContent: 'center',
@@ -104,16 +129,25 @@ export default function Capture() {
         <Press
           onPress={shoot}
           haptic="select"
+          disabled={taking}
           style={{
             width: 76, height: 76, borderRadius: radius.full,
             borderWidth: 4, borderColor: 'rgba(255,255,255,0.35)',
             alignItems: 'center', justifyContent: 'center',
           }}
         >
-          <View style={{ width: 62, height: 62, borderRadius: radius.full, backgroundColor: palette.light.accent }} />
+          <View
+            style={{
+              width: 62, height: 62, borderRadius: radius.full,
+              backgroundColor: palette.light.accent,
+              alignItems: 'center', justifyContent: 'center',
+            }}
+          >
+            {taking && <ActivityIndicator color="#000000" />}
+          </View>
         </Press>
 
-        <Press onPress={manual} style={{ width: 56 }}>
+        <Press onPress={() => router.replace({ pathname: '/event/[id]/manual', params: { id } })} style={{ width: 56 }}>
           <Txt variant="footnote" center style={{ color: '#FFFFFF', fontWeight: '600' }}>
             Type it{'\n'}instead
           </Txt>

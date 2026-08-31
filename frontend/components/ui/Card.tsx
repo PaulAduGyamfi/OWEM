@@ -3,7 +3,6 @@ import { View, type StyleProp, type ViewStyle } from 'react-native';
 import { HAIRLINE, radius, space, useColors } from '@/theme';
 import { Press } from './Pressable';
 
-/** A grouped block. Separators appear only BETWEEN rows, inset to the text. */
 export function Card({
   children, style, padded = false,
 }: {
@@ -36,7 +35,6 @@ export function Separator({ inset = 0 }: { inset?: number }) {
   return <View style={{ height: HAIRLINE, backgroundColor: c.border, marginLeft: inset }} />;
 }
 
-/** Rows: 56 single-line, 64 with subtitle, 72 with avatar + subtitle. */
 export function Row({
   children, height = 56, onPress, style, tint,
 }: {
@@ -66,7 +64,6 @@ export function Row({
   return onPress ? <Press onPress={onPress}>{body}</Press> : body;
 }
 
-/** Renders children with inset separators between them, never around them. */
 export function Grouped({
   children, inset = space[4], style,
 }: {

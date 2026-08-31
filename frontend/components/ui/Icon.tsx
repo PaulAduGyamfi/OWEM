@@ -1,8 +1,6 @@
 import Svg, { Circle, Path, Rect } from 'react-native-svg';
 import { useColors } from '@/theme';
 
-/** Rounded outline, 1.75px stroke on a 24px canvas. Filled variants only for
- *  an active navigation state. */
 export type IconName =
   | 'back' | 'forward' | 'down' | 'plus' | 'minus' | 'check' | 'close'
   | 'bell' | 'camera' | 'home' | 'people' | 'person' | 'receipt'

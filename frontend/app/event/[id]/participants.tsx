@@ -83,7 +83,7 @@ export default function Participants() {
                 <Badge label="Paid the bill" tone="accent" />
               ) : (
                 <Press
-                  onPress={() => removeParticipant(p.id)}
+                  onPress={() => void removeParticipant(id, p.id)}
                   style={{
                     width: 32, height: 32, borderRadius: radius.full,
                     backgroundColor: c.surfaceAlt, alignItems: 'center', justifyContent: 'center',

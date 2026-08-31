@@ -4,7 +4,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { allocate, cents, formatMoney } from '@/lib/money.ts';
 import { formatShortDay, percentOf } from '@/lib/format.ts';
-import { api, useEvent, useOwem } from '@/lib/store';
+import { assignmentsOf, lineFor, paidBy, useEvent, useOwem } from '@/lib/store';
 import { space, useColors } from '@/theme';
 import { Avatar } from '@/components/ui/Avatar';
 import { Badge } from '@/components/ui/Badge';
@@ -17,7 +17,6 @@ import { Txt } from '@/components/ui/Txt';
 import { RecordPaymentSheet, RequestSheet } from '@/components/owem/PaymentSheets';
 import { Banner } from '@/components/owem/Provenance';
 
-/** One person's amount, and every line that made it. */
 export default function Breakdown() {
   const c = useColors();
   const { id, pid } = useLocalSearchParams<{ id: string; pid: string }>();
@@ -30,16 +29,15 @@ export default function Breakdown() {
   const [recording, setRecording] = useState(false);
 
   const person = participants.find((p) => p.id === pid);
-  const line = api.lineFor(settlement, pid);
+  const line = lineFor(settlement, pid);
   if (!person || !line || !event || !settlement) return <Screen><Header /></Screen>;
 
-  const paid = api.paidBy(s, id, pid);
+  const paid = paidBy(s, id, pid);
   const left = cents(Math.max(0, line.amountOwed - paid));
 
-  // What they had, with the share of each line they carried.
   const had = items
     .map((item) => {
-      const on = api.assignmentsOf(s, item.id);
+      const on = assignmentsOf(s, id, item.id);
       const mine = on.findIndex((a) => a.participantId === pid);
       if (mine < 0) return null;
       const shares = allocate(item.totalPrice, on.map((a) => a.weight));
@@ -52,9 +50,6 @@ export default function Breakdown() {
     })
     .filter((x): x is NonNullable<typeof x> => x !== null);
 
-  // `had` is derived from LIVE assignments; `line` is the frozen snapshot. If
-  // somebody has been moved on or off a line since this version was locked the
-  // two will disagree, and the snapshot is the thing people were told.
   const liveSubtotal = had.reduce((a, h) => a + h.share, 0);
   const staleBy = cents(liveSubtotal - line.itemsSubtotal);
 

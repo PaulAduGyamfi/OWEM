@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { ScrollView, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { CONFIDENCE_FLOOR } from '@/lib/mock.ts';
+import { CONFIDENCE_FLOOR } from '@/lib/types.ts';
 import { formatMoney, sum } from '@/lib/money.ts';
 import { useEvent, useOwem } from '@/lib/store';
 import { pluralise } from '@/lib/format.ts';
@@ -17,18 +17,13 @@ import { ItemEditSheet } from '@/components/owem/ItemEditSheet';
 import { ItemRow } from '@/components/owem/ItemRow';
 import { Banner } from '@/components/owem/Provenance';
 
-/**
- * The trust boundary, on screen. Nothing the model produced can reach the
- * engine until a person accepts it — and the lines it was unsure about have to
- * be opened one at a time before the bulk confirm unlocks.
- */
 export default function Review() {
   const c = useColors();
   const { id, receiptId } = useLocalSearchParams<{ id: string; receiptId: string }>();
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { items } = useEvent(id);
-  const { patchItem, deleteItem, confirmAllItems } = useOwem();
+  const { updateItem, deleteItem, confirmReceipt } = useOwem();
   const [editing, setEditing] = useState<string | null>(null);
 
   const subtotal = sum(items.map((i) => i.totalPrice));
@@ -40,7 +35,7 @@ export default function Review() {
   const allConfirmed = items.every((i) => i.provenance === 'USER_CONFIRMED');
 
   const next = () => {
-    confirmAllItems(receiptId);
+    void confirmReceipt(id, receiptId);
     router.push({ pathname: '/event/[id]/charges', params: { id, receiptId } });
   };
 
@@ -107,11 +102,11 @@ export default function Review() {
         open={item !== null}
         onClose={() => setEditing(null)}
         onConfirm={(patch) => {
-          if (editing) patchItem(editing, patch);
+          if (editing) void updateItem(id, receiptId, editing, patch.normalizedName, patch.totalPrice);
           setEditing(null);
         }}
         onDelete={() => {
-          if (editing) deleteItem(editing);
+          if (editing) void deleteItem(id, receiptId, editing);
           setEditing(null);
         }}
       />

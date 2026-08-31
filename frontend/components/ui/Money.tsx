@@ -9,7 +9,6 @@ import { Txt } from './Txt';
 
 const AnimatedInput = Animated.createAnimatedComponent(TextInput);
 
-/** A plain amount. Tabular, so digits do not jitter in a list. */
 export function Money({
   value, variant = 'callout', color = 'ink', sign, style,
 }: {
@@ -26,10 +25,6 @@ export function Money({
   );
 }
 
-/**
- * A hero amount that counts to its new value when the number changes — the
- * balance visibly responding to what you just did.
- */
 export function CountingMoney({
   value, variant = 'displayXl', color = 'ink',
 }: {
@@ -38,8 +33,6 @@ export function CountingMoney({
   color?: ColorName;
 }) {
   const c = useColors();
-  // The trick below drives a native TextInput's value straight from the UI
-  // thread; web has no such prop, so there the figure is simply drawn.
   const isWeb = Platform.OS === 'web';
   const shown = useSharedValue(value as number);
 
@@ -73,8 +66,6 @@ export function CountingMoney({
           fontVariant: ['tabular-nums'],
           padding: 0,
           margin: 0,
-          // A read-only TextInput is the one way to animate text without a
-          // re-render on every frame.
           includeFontPadding: false,
         },
       ]}

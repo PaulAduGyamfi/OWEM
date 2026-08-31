@@ -3,8 +3,8 @@
 ## Money rule
 
 - Stored in Postgres as NUMERIC(12,2)
-- Represented in C# as decimal
-- Calculated inside the settlement engine as WHOLE CENTS (long) - NEVER float, NEVER double, anywhere, for any reason
+- Represented in Python as `decimal.Decimal`
+- Calculated inside the settlement engine as WHOLE CENTS (`int`) - NEVER float, anywhere, for any reason
 Why cents inside the engine: splitting money means dividing and then reconciling the leftover exactly. With whole cents, "the leftover" is a whole number you must explicitly give to someone. There is nowhere for a fraction to hide.
 
 ## Provenance rule

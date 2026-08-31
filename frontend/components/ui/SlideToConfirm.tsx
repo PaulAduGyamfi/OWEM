@@ -13,12 +13,6 @@ const TRACK_HEIGHT = 56;
 const THUMB = 48;
 const PAD = 4;
 
-/**
- * Drag to commit. Reserve this for a single action per flow — its power comes
- * from being rare — and only where the action changes what somebody owes.
- * The control still exposes a button role with an explicit confirmation step:
- * the gesture is an affordance, not the only path.
- */
 export function SlideToConfirm({
   label, doneLabel = 'Done', onConfirm, width, disabled = false,
 }: {
@@ -26,8 +20,6 @@ export function SlideToConfirm({
   doneLabel?: string;
   onConfirm: () => void;
   width: number;
-  /** When the action is not available the control greys out and refuses the
-   *  gesture — it never reports success for something it did not do. */
   disabled?: boolean;
 }) {
   const c = useColors();
@@ -39,7 +31,6 @@ export function SlideToConfirm({
     if (disabled) return;
     haptics.commit();
     setDone(true);
-    // Success morphs to a checkmark for 800ms before it hands over.
     setTimeout(onConfirm, 800);
   };
 

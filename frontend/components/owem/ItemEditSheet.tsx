@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { View } from 'react-native';
 import { formatAmount, parseAmount } from '@/lib/money.ts';
 import type { ReceiptItem } from '@/lib/types.ts';
-import { CONFIDENCE_FLOOR } from '@/lib/mock.ts';
+import { CONFIDENCE_FLOOR } from '@/lib/types.ts';
 import { space, useColors } from '@/theme';
 import { Button } from '@/components/ui/Button';
 import { Grouped, Row } from '@/components/ui/Card';
@@ -14,7 +14,6 @@ import { Txt } from '@/components/ui/Txt';
 import { Banner } from './Provenance';
 import { MONO } from './ItemRow';
 
-/** Confirming marks the line as yours, not the model's. */
 export function ItemEditSheet({
   item, lineCount, open, onClose, onConfirm, onDelete,
 }: {

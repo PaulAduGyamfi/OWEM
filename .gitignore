@@ -1,12 +1,36 @@
-# Secrets - NEVER commit these .env
-.env.local
-*.env appsettings.Development.json
-# .NET build output bin/
-obj/
-*.user
-# Node node_modules/ .expo/
-dist/ web-build/
-# OS junk .DS_Store Thumbs.db
-# Real receipt images (they contain personal data) evals/dataset/*.jpg
+# Secrets — NEVER commit these
+.env
+.env.*
+!.env.example
+
+# Python
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
+
+# Node / Expo
+node_modules/
+.expo/
+dist/
+web-build/
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+# Receipt photos — a receipt is a small dossier on somebody's evening
+backend/.receipts/
+evals/dataset/*.jpg
 evals/dataset/*.jpeg
-evals/dataset/*.png
+
+# Generated eval receipts are committable; real photographs are not.
+!evals/dataset/rosatis-clean.png
+!evals/dataset/taqueria-faded.png
+!evals/dataset/bistro-discount.png
+!evals/dataset/diner-longtail.png
+!evals/dataset/injection-attempt.png

@@ -44,6 +44,17 @@ Apple Developer account). Nothing in this prototype needs an API newer than 54 â
 Nothing is hardcoded that ought to be computed. Change who is on the chicken
 wings and every balance moves, including the odd cent.
 
+## Data
+
+There is no mock. The app talks to the FastAPI backend and needs it running â€”
+`EXPO_PUBLIC_API_BASE_URL` in `.env`, and a LAN address rather than `localhost`
+if you are on a real phone.
+
+`lib/api.ts` is the only file that knows HTTP exists. It converts money strings
+to cents on the way in and back on the way out, so every screen works in whole
+cents and never sees a float. `lib/store.tsx` holds the hydrated state and the
+selectors the screens read.
+
 ## Brand assets
 
 `assets/images/` holds the shipped marks, taken from the lime export

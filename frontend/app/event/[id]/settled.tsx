@@ -6,7 +6,7 @@ import Animated, { FadeInDown, ReduceMotion, useAnimatedStyle, useSharedValue, w
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { formatMoney } from '@/lib/money.ts';
 import { formatShortDay, pluralise } from '@/lib/format.ts';
-import { api, useEvent, useOwem } from '@/lib/store';
+import { paidBy, useEvent, useOwem } from '@/lib/store';
 import { PAYMENT_METHOD_LABEL } from '@/lib/types.ts';
 import { radius, space, springs, useColors, useTheme } from '@/theme';
 import { Avatar } from '@/components/ui/Avatar';
@@ -17,14 +17,13 @@ import { Icon } from '@/components/ui/Icon';
 import { Money } from '@/components/ui/Money';
 import { Txt } from '@/components/ui/Txt';
 
-/** The reward moment: system green on its own tint, and one lime action. */
 export default function Settled() {
   const c = useColors();
   const { scheme } = useTheme();
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { s, closeEvent } = useOwem();
+  const { s } = useOwem();
   const { event, settlement, participants, payer, summary, payments } = useEvent(id);
 
   const scale = useSharedValue(0.6);
@@ -41,7 +40,7 @@ export default function Settled() {
       const person = participants.find((p) => p.id === l.participantId);
       if (!person) return null;
       const theirs = payments.filter((p) => p.participantId === l.participantId);
-      const paid = api.paidBy(s, id, l.participantId);
+      const paid = paidBy(s, id, l.participantId);
       return { person, paid, methods: theirs, last: theirs.at(-1) };
     })
     .filter((r): r is NonNullable<typeof r> => r !== null);
@@ -143,10 +142,7 @@ export default function Settled() {
           <Button
             label="Close event"
             flex
-            onPress={() => {
-              closeEvent(id);
-              router.dismissTo('/(tabs)');
-            }}
+            onPress={() => router.dismissTo('/(tabs)')}
           />
         </ButtonRow>
       </View>

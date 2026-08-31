@@ -3,7 +3,7 @@ import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { pluralise } from '@/lib/format.ts';
 import { cents } from '@/lib/money.ts';
-import { api, useOwem } from '@/lib/store';
+import { isPayer, paidBy, summarise, useOwem } from '@/lib/store';
 import { space, useColors } from '@/theme';
 import { Avatar } from '@/components/ui/Avatar';
 import { Badge } from '@/components/ui/Badge';
@@ -12,7 +12,6 @@ import { Money } from '@/components/ui/Money';
 import { DOCK_HEIGHT } from '@/components/ui/TabBar';
 import { Txt } from '@/components/ui/Txt';
 
-/** Everyone who owes you anything, across every event. */
 export default function Balances() {
   const c = useColors();
   const { s } = useOwem();
@@ -20,22 +19,26 @@ export default function Balances() {
   const insets = useSafeAreaInsets();
 
   const rows = s.events.flatMap((event) => {
-    const summary = api.summarise(s, event.id);
+    const summary = summarise(s, event.id);
     if (!summary.settlement) return [];
     return summary.settlement.lines
-      .filter((l) => !api.isPayer(s, l.participantId))
-      // A settlement line can outlive its participant (someone with no
-      // assignments can be removed), so drop lines whose person is gone.
-      .map((l) => {
-        const person = s.participants.find((p) => p.id === l.participantId);
+      .filter((line) => !isPayer(s, event.id, line.participantId))
+      .map((line) => {
+        const person = summary.participants.find((p) => p.id === line.participantId);
         if (!person) return null;
-        const paid = api.paidBy(s, event.id, l.participantId);
-        return { event, person, owed: l.amountOwed, paid, left: cents(Math.max(0, l.amountOwed - paid)) };
+        const paid = paidBy(s, event.id, line.participantId);
+        return {
+          event,
+          person,
+          owed: line.amountOwed,
+          paid,
+          left: cents(Math.max(0, line.amountOwed - paid)),
+        };
       })
-      .filter((r): r is NonNullable<typeof r> => r !== null && r.left > 0);
+      .filter((row): row is NonNullable<typeof row> => row !== null && row.left > 0);
   });
 
-  const total = cents(rows.reduce((a, r) => a + r.left, 0));
+  const total = cents(rows.reduce((sum, row) => sum + row.left, 0));
 
   return (
     <ScrollView

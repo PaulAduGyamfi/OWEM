@@ -10,11 +10,6 @@ import { Icon } from './Icon';
 import { Press } from './Pressable';
 import { Txt } from './Txt';
 
-/**
- * Consequential moments arrive as a sheet on a dimmed parent, never a full
- * screen route change — so the user never loses their place.
- * Never full height: the parent stays partly visible.
- */
 export function Sheet({
   open, onClose, title, subtitle, children, detent = 'medium',
 }: {

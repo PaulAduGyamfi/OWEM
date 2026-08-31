@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { ScrollView, View } from 'react-native';
 import { allocate, formatMoney } from '@/lib/money.ts';
-import type { ItemAssignment, Participant, ReceiptItem } from '@/lib/types.ts';
+import type { Assignment, Participant, ReceiptItem } from '@/lib/types.ts';
 import { radius, space, useColors } from '@/theme';
 import { Button } from '@/components/ui/Button';
 import { Chip } from '@/components/ui/Badge';
@@ -12,16 +12,12 @@ import { Sheet } from '@/components/ui/Sheet';
 import { Stepper } from '@/components/ui/Stepper';
 import { Txt } from '@/components/ui/Txt';
 
-/**
- * The complete set of people on one line, replaced atomically — there is no
- * moment where the item belongs to nobody.
- */
 export function AssignSheet({
   item, participants, current, open, onClose, onSave,
 }: {
   item: ReceiptItem | null;
   participants: Participant[];
-  current: ItemAssignment[];
+  current: Assignment[];
   open: boolean;
   onClose: () => void;
   onSave: (on: { participantId: string; weight: number }[]) => void;

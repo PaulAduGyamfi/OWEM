@@ -1,361 +1,240 @@
-/**
- * The mock backend.
- *
- * Every function here is named after the endpoint it stands in for, listed in
- * docs/architecture/api-design.md. Phase 2 replaces the body of each one with a
- * fetch to that endpoint — no screen and no component changes shape.
- *
- * Pure: each takes state and returns new state. No dates, ids or money are
- * invented anywhere else in the app.
- */
-import { cents, sum, ZERO } from './money.ts';
-import { nextId, seed, EXTRACTED_LINES, EXTRACTED_TAX, EXTRACTED_MERCHANT, type Db } from './mock.ts';
-import { computeSettlement, ENGINE_VERSION, UnassignedItemsError, UnconfirmedInputError } from './settlement.ts';
+import { cents, parseAmount } from './money.ts';
 import type {
-  Cents, GroupEvent, ItemAssignment, Participant, Payment, PaymentMethod, Receipt,
-  ReceiptItem, Settlement, SettlementLine, TipPolicy,
+  Assignment,
+  Cents,
+  Event,
+  EventDetail,
+  Payment,
+  PaymentMethod,
+  Participant,
+  Receipt,
+  ReceiptItem,
+  Settlement,
+  SettlementLine,
+  Extraction,
+  TipPolicy,
 } from './types.ts';
 
-export type State = Db & { settlements: Settlement[] };
+export const API_BASE = process.env.EXPO_PUBLIC_API_BASE_URL ?? 'http://localhost:8000';
 
-const now = () => new Date().toISOString();
+export class ApiError extends Error {
+  code: string;
+  status: number;
+  details: Record<string, unknown>;
 
-/** GET /events — plus the derived numbers every list row needs. */
-export type EventSummary = {
-  event: GroupEvent;
-  participants: Participant[];
-  headcount: number;
-  total: Cents;
-  owedToPayer: Cents;
-  outstanding: Cents;
-  collected: Cents;
-  settlement: Settlement | null;
+  constructor(status: number, code: string, message: string, details: Record<string, unknown>) {
+    super(message);
+    this.name = 'ApiError';
+    this.status = status;
+    this.code = code;
+    this.details = details;
+  }
+}
+
+type ErrorBody = {
+  error?: { code?: string; message?: string; details?: Record<string, unknown> };
 };
 
-export function initialState(): State {
-  const db = seed();
-  let s: State = { ...db, settlements: [] };
+async function request<T>(method: string, path: string, body?: unknown): Promise<T> {
+  const isForm = body instanceof FormData;
+  let response: Response;
 
-  for (const event of db.events) {
-    s = createSettlement(s, event.id, null);
+  try {
+    response = await fetch(`${API_BASE}/api${path}`, {
+      method,
+      headers: isForm || body === undefined ? {} : { 'content-type': 'application/json' },
+      body: isForm ? body : body === undefined ? undefined : JSON.stringify(body),
+    });
+  } catch {
+    throw new ApiError(0, 'UNREACHABLE', `Could not reach ${API_BASE}.`, {});
   }
 
-  // Kai's birthday is done: everyone but the payer paid in full.
-  const kai = latestSettlement(s, 'ev3');
-  if (kai) {
-    const payments: Payment[] = kai.lines
-      .filter((l) => !isPayer(s, l.participantId))
-      .map((l, i) => ({
-        id: `pay_seed3_${i}`, eventId: 'ev3', participantId: l.participantId,
-        amount: l.amountOwed, method: (['venmo', 'cashapp', 'cash', 'zelle', 'applecash'] as PaymentMethod[])[i % 5],
-        externalRef: null, recordedAt: '2026-08-04T12:00:00.000Z',
-      }));
-    s = { ...s, payments: [...s.payments, ...payments] };
+  const text = await response.text();
+  const parsed = text ? (JSON.parse(text) as unknown) : null;
+
+  if (!response.ok) {
+    const { error } = (parsed ?? {}) as ErrorBody;
+    throw new ApiError(
+      response.status,
+      error?.code ?? 'UNKNOWN',
+      error?.message ?? response.statusText,
+      error?.details ?? {},
+    );
   }
-  return s;
+  return parsed as T;
 }
 
-// ── reads ───────────────────────────────────────────────────────────────────
-
-export const participantsOf = (s: State, eventId: string): Participant[] =>
-  s.participants.filter((p) => p.eventId === eventId);
-
-export const payerOf = (s: State, eventId: string): Participant | undefined =>
-  participantsOf(s, eventId).find((p) => p.isPayer);
-
-export const isPayer = (s: State, participantId: string): boolean =>
-  s.participants.find((p) => p.id === participantId)?.isPayer ?? false;
-
-export const receiptOf = (s: State, eventId: string): Receipt | undefined =>
-  s.receipts.find((r) => r.eventId === eventId);
-
-export const itemsOf = (s: State, receiptId: string | undefined): ReceiptItem[] =>
-  receiptId ? s.items.filter((i) => i.receiptId === receiptId).sort((a, b) => a.lineNumber - b.lineNumber) : [];
-
-export const assignmentsOf = (s: State, itemId: string): ItemAssignment[] =>
-  s.assignments.filter((a) => a.itemId === itemId);
-
-export const paymentsOf = (s: State, eventId: string): Payment[] =>
-  s.payments.filter((p) => p.eventId === eventId);
-
-export const paidBy = (s: State, eventId: string, participantId: string): Cents =>
-  sum(paymentsOf(s, eventId).filter((p) => p.participantId === participantId).map((p) => p.amount));
-
-/** GET /events/{id}/settlement — the latest version. */
-export function latestSettlement(s: State, eventId: string): Settlement | null {
-  const all = s.settlements.filter((x) => x.eventId === eventId);
-  return all.length ? all.reduce((a, b) => (b.version > a.version ? b : a)) : null;
+export function toCents(amount: string): Cents {
+  const parsed = parseAmount(amount);
+  if (parsed === null) throw new Error(`unreadable amount from the API: ${amount}`);
+  return parsed;
 }
 
-export const settlementHistory = (s: State, eventId: string): Settlement[] =>
-  s.settlements.filter((x) => x.eventId === eventId).sort((a, b) => b.version - a.version);
-
-export const lineFor = (st: Settlement | null, participantId: string): SettlementLine | undefined =>
-  st?.lines.find((l) => l.participantId === participantId);
-
-/** GET /events/{id}/balances */
-export function summarise(s: State, eventId: string): EventSummary {
-  const event = s.events.find((e) => e.id === eventId)!;
-  const participants = participantsOf(s, eventId);
-  const settlement = latestSettlement(s, eventId);
-  const payer = payerOf(s, eventId);
-
-  const owing = settlement
-    ? settlement.lines.filter((l) => l.participantId !== payer?.id)
-    : [];
-
-  const owedToPayer = sum(owing.map((l) => l.amountOwed));
-  const collected = sum(paymentsOf(s, eventId).map((p) => p.amount));
-
-  /**
-   * Outstanding is clamped PER PERSON, never on the event total. Clamping the
-   * total would let one person's overpayment cancel another person's debt and
-   * mark the event settled while people still owe.
-   */
-  const outstanding = sum(
-    owing.map((l) => cents(Math.max(0, l.amountOwed - paidBy(s, eventId, l.participantId)))),
-  );
-
-  return {
-    event,
-    participants,
-    headcount: participants.length,
-    total: settlement?.totalAmount ?? receiptOf(s, eventId)?.total ?? ZERO,
-    owedToPayer,
-    collected,
-    outstanding,
-    settlement,
-  };
+export function toAmount(value: Cents): string {
+  const abs = Math.abs(value);
+  return `${Math.floor(abs / 100)}.${String(abs % 100).padStart(2, '0')}`;
 }
 
-export const openEvents = (s: State): GroupEvent[] =>
-  s.events.filter((e) => e.status !== 'CLOSED');
-
-/** What the home screen's hero number is: everything still out, everywhere. */
-export const totalOutstanding = (s: State): Cents =>
-  sum(s.events.map((e) => summarise(s, e.id).outstanding));
-
-// ── writes ──────────────────────────────────────────────────────────────────
-
-/** POST /events */
-export function createEvent(s: State, input: { title: string; place: string | null }): [State, string] {
-  const id = nextId('ev');
-  const event: GroupEvent = {
-    id, title: input.title.trim() || 'Untitled event', place: input.place,
-    currency: 'USD', status: 'DRAFT', occurredAt: now(), updatedAt: now(),
-  };
-  const payer: Participant = {
-    id: nextId('pt'), eventId: id, displayName: 'Paul', isPayer: true, contactHandle: null,
-  };
-  return [{ ...s, events: [event, ...s.events], participants: [...s.participants, payer] }, id];
-}
-
-/** POST /events/{id}/participants */
-export function addParticipant(s: State, eventId: string, displayName: string): State {
-  const name = displayName.trim();
-  if (!name) return s;
-  const exists = participantsOf(s, eventId).some(
-    (p) => p.displayName.toLowerCase() === name.toLowerCase(),
-  );
-  if (exists) return s;
-  const p: Participant = {
-    id: nextId('pt'), eventId, displayName: name, isPayer: false, contactHandle: null,
-  };
-  return { ...s, participants: [...s.participants, p] };
-}
-
-/** DELETE /events/{id}/participants/{pid} — only if they are on nothing. */
-export function removeParticipant(s: State, participantId: string): State {
-  if (s.assignments.some((a) => a.participantId === participantId)) return s;
-  return {
-    ...s,
-    participants: s.participants.filter((p) => p.id !== participantId),
-  };
-}
-
-/** POST /events/{id}/receipts */
-export function createReceipt(s: State, eventId: string): [State, string] {
-  const existing = receiptOf(s, eventId);
-  if (existing) {
-    return [
-      {
-        ...s,
-        receipts: s.receipts.map((r) => (r.id === existing.id ? { ...r, state: 'EXTRACTING' } : r)),
-        items: s.items.filter((i) => i.receiptId !== existing.id),
-        assignments: s.assignments.filter(
-          (a) => !s.items.some((i) => i.receiptId === existing.id && i.id === a.itemId),
-        ),
-      },
-      existing.id,
-    ];
+export async function isReachable(timeoutMs = 3000): Promise<boolean> {
+  const abort = new AbortController();
+  const timer = setTimeout(() => abort.abort(), timeoutMs);
+  try {
+    const response = await fetch(`${API_BASE}/health`, { signal: abort.signal });
+    return response.ok;
+  } catch {
+    return false;
+  } finally {
+    clearTimeout(timer);
   }
-  const id = nextId('rc');
-  const receipt: Receipt = {
-    id, eventId, merchant: null, state: 'EXTRACTING',
-    tax: ZERO, tip: ZERO, discount: ZERO, total: ZERO,
-    tipPolicy: 'PROPORTIONAL', taxProvenance: 'SYSTEM_COMPUTED', confirmedAt: null,
-  };
-  return [{ ...s, receipts: [...s.receipts, receipt] }, id];
 }
 
-/**
- * What the extraction call comes back with. Everything a model produced lands
- * as AI_SUGGESTED — including the tax — and cannot reach the engine until a
- * person confirms it.
- */
-export function applyExtraction(s: State, receiptId: string): State {
-  const items: ReceiptItem[] = EXTRACTED_LINES.map((l, n) => ({
-    id: nextId('it'), receiptId, lineNumber: n + 1,
-    rawName: l.raw, normalizedName: l.name, quantity: l.qty,
-    totalPrice: cents(l.price), provenance: 'AI_SUGGESTED', confidence: l.confidence,
-  }));
+type Wire<T> = { [K in keyof T]: T[K] extends Cents ? string : T[K] };
+
+function toReceipt(wire: Wire<Receipt>): Receipt {
   return {
-    ...s,
-    items: [...s.items, ...items],
-    receipts: s.receipts.map((r) =>
-      r.id === receiptId
-        ? { ...r, state: 'NEEDS_REVIEW', merchant: EXTRACTED_MERCHANT, tax: EXTRACTED_TAX, taxProvenance: 'AI_SUGGESTED' }
-        : r,
-    ),
+    ...wire,
+    tax: toCents(wire.tax),
+    tip: toCents(wire.tip),
+    discount: toCents(wire.discount),
+    total: toCents(wire.total),
   };
 }
 
-/** PATCH /receipts/{id}/items/{iid} — any edit is a human accepting the line. */
-export function patchItem(
-  s: State, itemId: string, patch: Partial<Pick<ReceiptItem, 'normalizedName' | 'quantity' | 'totalPrice'>>,
-): State {
+function toItem(wire: Wire<ReceiptItem>): ReceiptItem {
+  return { ...wire, totalPrice: toCents(wire.totalPrice) };
+}
+
+function toSettlement(wire: Omit<Settlement, 'totalAmount' | 'lines'> & {
+  totalAmount: string;
+  lines: Wire<SettlementLine>[];
+}): Settlement {
   return {
-    ...s,
-    items: s.items.map((i) =>
-      i.id === itemId ? { ...i, ...patch, provenance: 'USER_CONFIRMED' } : i,
-    ),
+    ...wire,
+    totalAmount: toCents(wire.totalAmount),
+    lines: wire.lines.map((line) => ({
+      participantId: line.participantId,
+      itemsSubtotal: toCents(line.itemsSubtotal),
+      taxShare: toCents(line.taxShare),
+      tipShare: toCents(line.tipShare),
+      discountShare: toCents(line.discountShare),
+      amountOwed: toCents(line.amountOwed),
+    })),
   };
 }
 
-export const confirmItem = (s: State, itemId: string): State => patchItem(s, itemId, {});
-
-/** DELETE /receipts/{id}/items/{iid} */
-export function deleteItem(s: State, itemId: string): State {
-  return {
-    ...s,
-    items: s.items.filter((i) => i.id !== itemId),
-    assignments: s.assignments.filter((a) => a.itemId !== itemId),
-  };
+function toPayment(wire: Wire<Payment>): Payment {
+  return { ...wire, amount: toCents(wire.amount) };
 }
 
-/** POST /receipts/{id}/items — typed in by hand, so confirmed on arrival. */
-export function addItem(s: State, receiptId: string, input: { name: string; price: Cents }): State {
-  const n = itemsOf(s, receiptId).length + 1;
-  const item: ReceiptItem = {
-    id: nextId('it'), receiptId, lineNumber: n,
-    rawName: input.name.toUpperCase(), normalizedName: input.name,
-    quantity: 1, totalPrice: input.price, provenance: 'USER_CONFIRMED', confidence: null,
-  };
-  return { ...s, items: [...s.items, item] };
-}
+export const api = {
+  listEvents: () => request<Event[]>('GET', '/events'),
 
-export function confirmAllItems(s: State, receiptId: string): State {
-  return {
-    ...s,
-    items: s.items.map((i) => (i.receiptId === receiptId ? { ...i, provenance: 'USER_CONFIRMED' } : i)),
-    receipts: s.receipts.map((r) => (r.id === receiptId ? { ...r, taxProvenance: 'USER_CONFIRMED' } : r)),
-  };
-}
+  getEvent: async (id: string): Promise<EventDetail> => {
+    const wire = await request<
+      Event & {
+        participants: Participant[];
+        receipt: Wire<Receipt> | null;
+        items: Wire<ReceiptItem>[];
+        assignments: { id: string; itemId: string; participantId: string; weight: string }[];
+        payments: Wire<Payment>[];
+        settlementVersion: number | null;
+      }
+    >('GET', `/events/${id}`);
+    return {
+      ...wire,
+      receipt: wire.receipt ? toReceipt(wire.receipt) : null,
+      items: wire.items.map(toItem),
+      assignments: wire.assignments.map((a) => ({ ...a, weight: Number(a.weight) })),
+      payments: wire.payments.map(toPayment),
+    };
+  },
 
-export function setCharges(
-  s: State, receiptId: string,
-  input: { tax?: Cents; tip?: Cents; discount?: Cents; tipPolicy?: TipPolicy },
-): State {
-  return {
-    ...s,
-    receipts: s.receipts.map((r) => {
-      if (r.id !== receiptId) return r;
-      const next = { ...r, ...input, taxProvenance: 'USER_CONFIRMED' as const };
-      const items = itemsOf(s, receiptId);
-      const subtotal = sum(items.map((i) => i.totalPrice));
-      return { ...next, total: cents(subtotal + next.tax + next.tip - next.discount) };
+  listSettlements: async (eventId: string): Promise<Settlement[]> => {
+    const wire = await request<Parameters<typeof toSettlement>[0][]>(
+      'GET', `/events/${eventId}/settlements`);
+    return wire.map(toSettlement);
+  },
+
+  getSettlement: async (eventId: string) =>
+    toSettlement(await request('GET', `/events/${eventId}/settlement`)),
+
+  createEvent: (title: string, place: string | null) =>
+    request<Event>('POST', '/events', { title, place }),
+
+  addParticipant: (eventId: string, displayName: string) =>
+    request('POST', `/events/${eventId}/participants`, { displayName }),
+
+  removeParticipant: (eventId: string, participantId: string) =>
+    request('DELETE', `/events/${eventId}/participants/${participantId}`),
+
+  createReceipt: async (eventId: string) =>
+    toReceipt(await request('POST', `/events/${eventId}/receipts`)),
+
+  extract: async (eventId: string, photo: { uri: string; name: string; type: string }) => {
+    const form = new FormData();
+    form.append('photo', photo as unknown as Blob);
+    const wire = await request<{
+      receipt: Wire<Receipt>;
+      items: Wire<ReceiptItem>[];
+      needsReview: number[];
+      problems: string[];
+      merchant: string | null;
+    }>('POST', `/events/${eventId}/receipts/extract`, form);
+    return {
+      ...wire,
+      receipt: toReceipt(wire.receipt),
+      items: wire.items.map(toItem),
+    } satisfies Extraction;
+  },
+
+  addItem: async (receiptId: string, name: string, price: Cents) =>
+    toItem(await request('POST', `/receipts/${receiptId}/items`, {
+      name,
+      totalPrice: toAmount(price),
+    })),
+
+  updateItem: async (receiptId: string, itemId: string, name?: string, price?: Cents) =>
+    toItem(await request('PATCH', `/receipts/${receiptId}/items/${itemId}`, {
+      name,
+      totalPrice: price === undefined ? undefined : toAmount(price),
+    })),
+
+  deleteItem: (receiptId: string, itemId: string) =>
+    request('DELETE', `/receipts/${receiptId}/items/${itemId}`),
+
+  setCharges: (
+    receiptId: string,
+    charges: { tax?: Cents; tip?: Cents; discount?: Cents; tipPolicy?: TipPolicy },
+  ) =>
+    request<Wire<Receipt>>('PATCH', `/receipts/${receiptId}`, {
+      tax: charges.tax === undefined ? undefined : toAmount(charges.tax),
+      tip: charges.tip === undefined ? undefined : toAmount(charges.tip),
+      discount: charges.discount === undefined ? undefined : toAmount(charges.discount),
+      tipPolicy: charges.tipPolicy,
+    }).then(toReceipt),
+
+  confirmReceipt: async (receiptId: string) =>
+    toReceipt(await request('POST', `/receipts/${receiptId}/confirm`)),
+
+  putAssignments: (itemId: string, on: { participantId: string; weight: number }[]) =>
+    request<Assignment[]>('PUT', `/items/${itemId}/assignments`, {
+      assignments: on.map((a) => ({ participantId: a.participantId, weight: a.weight.toFixed(3) })),
     }),
-  };
-}
 
-/** POST /receipts/{id}/confirm */
-export function confirmReceipt(s: State, receiptId: string): State {
-  return {
-    ...s,
-    receipts: s.receipts.map((r) =>
-      r.id === receiptId ? { ...r, state: 'CONFIRMED', confirmedAt: now() } : r,
-    ),
-  };
-}
+  createSettlement: async (eventId: string, reason: string | null) =>
+    toSettlement(await request('POST', `/events/${eventId}/settlement`, { reason })),
 
-/**
- * PUT /items/{id}/assignments — the COMPLETE set, replaced atomically.
- * "Who is on this item" is one logical fact; there is no half-applied state.
- */
-export function putAssignments(
-  s: State, itemId: string, on: { participantId: string; weight: number }[],
-): State {
-  const fresh: ItemAssignment[] = on.map((x) => ({
-    id: nextId('as'), itemId, participantId: x.participantId,
-    weight: x.weight, provenance: 'USER_CONFIRMED',
-  }));
-  return { ...s, assignments: [...s.assignments.filter((a) => a.itemId !== itemId), ...fresh] };
-}
+  createPayment: (
+    eventId: string,
+    participantId: string,
+    amount: Cents,
+    method: PaymentMethod,
+  ) =>
+    request<Wire<Payment>>('POST', `/events/${eventId}/payments`, {
+      participantId,
+      amount: toAmount(amount),
+      method,
+    }).then(toPayment),
+};
 
-/**
- * POST /events/{id}/settlement — creates a NEW version. INVARIANT 3: an
- * existing settlement row is never updated.
- */
-export function createSettlement(s: State, eventId: string, reason: string | null): State {
-  const receipt = receiptOf(s, eventId);
-  if (!receipt) return s;
-  const lines = computeSettlement({
-    receipt,
-    items: itemsOf(s, receipt.id),
-    assignments: s.assignments.filter((a) => itemsOf(s, receipt.id).some((i) => i.id === a.itemId)),
-    participants: participantsOf(s, eventId),
-  });
-  const previous = latestSettlement(s, eventId);
-  const settlement: Settlement = {
-    id: nextId('st'), eventId, version: (previous?.version ?? 0) + 1,
-    totalAmount: sum(lines.map((l) => l.amountOwed)),
-    engineVersion: ENGINE_VERSION, createdAt: now(), reason,
-    lines,
-  };
-  return {
-    ...s,
-    settlements: [...s.settlements, settlement],
-    events: s.events.map((e) =>
-      e.id === eventId && e.status === 'DRAFT' ? { ...e, status: 'COLLECTING', updatedAt: now() } : e,
-    ),
-  };
-}
-
-/** POST /events/{id}/payments */
-export function createPayment(
-  s: State, eventId: string, participantId: string, amount: Cents, method: PaymentMethod,
-): State {
-  if (amount <= 0) return s;
-  const payment: Payment = {
-    id: nextId('pay'), eventId, participantId, amount, method,
-    externalRef: null, recordedAt: now(),
-  };
-  const next = { ...s, payments: [...s.payments, payment] };
-  const after = summarise(next, eventId);
-  const done = after.settlement !== null && after.outstanding === 0;
-  return {
-    ...next,
-    events: next.events.map((e) =>
-      e.id === eventId && done ? { ...e, status: 'SETTLED', updatedAt: now() } : e,
-    ),
-  };
-}
-
-export function closeEvent(s: State, eventId: string): State {
-  return {
-    ...s,
-    events: s.events.map((e) => (e.id === eventId ? { ...e, status: 'CLOSED', updatedAt: now() } : e)),
-  };
-}
-
-export { UnassignedItemsError, UnconfirmedInputError };
+export { cents };

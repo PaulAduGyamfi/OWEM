@@ -5,12 +5,6 @@ import { Badge } from '@/components/ui/Badge';
 import { Icon } from '@/components/ui/Icon';
 import { Txt } from '@/components/ui/Txt';
 
-/**
- * The state that governs the maths, made visible:
- *   AI_SUGGESTED    — the engine refuses it. Amber: a human still has to look.
- *   USER_CONFIRMED  — a person accepted it.
- *   SYSTEM_COMPUTED — our own arithmetic.
- */
 export function ProvenanceBadge({ value }: { value: Provenance }) {
   const c = useColors();
   if (value === 'AI_SUGGESTED') return <Badge label="Needs you" tone="warning" />;
@@ -25,7 +19,6 @@ export function ProvenanceBadge({ value }: { value: Provenance }) {
 
 export type BannerTone = 'positive' | 'warning' | 'neutral' | 'accent';
 
-/** One line of state, on its soft pill. Never decoration. */
 export function Banner({
   tone, text, action, icon,
 }: {

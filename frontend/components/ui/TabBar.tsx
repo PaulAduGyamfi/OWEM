@@ -15,11 +15,6 @@ const DESTINATIONS: Dest[] = [
   { href: '/(tabs)/profile', icon: 'person', label: 'You' },
 ];
 
-/**
- * Detached from the screen edge and the full width. Glass belongs to the
- * navigation layer only — the content underneath stays solid, and the create
- * action sits outside the pill so it never competes with navigation.
- */
 export function TabBar({ onCreate }: { onCreate?: () => void } = {}) {
   const c = useColors();
   const { scheme } = useTheme();

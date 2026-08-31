@@ -1,0 +1,22 @@
+# Local development. Postgres only — the API runs on the host with uvicorn so
+# reloads are instant.
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: owem-db
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-owem}
+      POSTGRES_USER: ${POSTGRES_USER:-owem}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-not-a-real-password}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - owem-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-owem} -d ${POSTGRES_DB:-owem}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  owem-db-data:

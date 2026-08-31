@@ -3,7 +3,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { formatMoney } from '@/lib/money.ts';
 import { formatStamp, pluralise } from '@/lib/format.ts';
-import { api, useEvent, useOwem } from '@/lib/store';
+import { useEvent, useOwem } from '@/lib/store';
 import { radius, space, useColors } from '@/theme';
 import { Avatar } from '@/components/ui/Avatar';
 import { Badge } from '@/components/ui/Badge';
@@ -17,8 +17,6 @@ import { Screen } from '@/components/ui/Screen';
 import { Txt } from '@/components/ui/Txt';
 import { Banner } from '@/components/owem/Provenance';
 
-/** An immutable snapshot of who owes what. Once you have told people what they
- *  owe, that is a promise — so this screen shows a version, not a live figure. */
 export default function SettlementScreen() {
   const c = useColors();
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -38,7 +36,6 @@ export default function SettlementScreen() {
     );
   }
 
-  // A line can outlive its participant, so only render lines we can name.
   const owing = settlement.lines
     .filter((l) => l.participantId !== payer?.id && participants.some((p) => p.id === l.participantId))
     .sort((a, b) => b.amountOwed - a.amountOwed);

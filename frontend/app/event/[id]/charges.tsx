@@ -32,7 +32,6 @@ export default function Charges() {
   const total = cents(subtotal + tax + tip);
   const percent = subtotal > 0 ? Math.round((tip / subtotal) * 100) : 0;
 
-  /** Folds each pan frame into the latest tip, so none are lost in a batch. */
   const adjustTip = useCallback(
     (deltaPercentPoints: number) => {
       setTip((prev) => {
@@ -138,7 +137,7 @@ export default function Charges() {
             label="Assign items"
             icon="arrowRight"
             onPress={() => {
-              setCharges(receiptId, { tip, tipPolicy: policy });
+              void setCharges(id, receiptId, { tip, tipPolicy: policy });
               router.push({ pathname: '/event/[id]/assign', params: { id, receiptId } });
             }}
           />

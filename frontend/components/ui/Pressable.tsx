@@ -8,7 +8,6 @@ import * as haptics from '@/lib/haptics';
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
-/** Press scales to 0.97 over 120ms. Nothing bounces. */
 export function Press({
   children, onPress, disabled, style, hitSlop = 6, haptic = 'tap',
 }: {
