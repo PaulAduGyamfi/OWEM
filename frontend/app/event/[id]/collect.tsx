@@ -18,7 +18,8 @@ import { ProgressBar } from '@/components/ui/Progress';
 import { Press } from '@/components/ui/Pressable';
 import { Screen } from '@/components/ui/Screen';
 import { Txt } from '@/components/ui/Txt';
-import { RecordPaymentSheet, RequestSheet } from '@/components/owem/PaymentSheets';
+import { RecordPaymentSheet } from '@/components/owem/RecordPaymentSheet';
+import { RequestSheet } from '@/components/owem/RequestSheet';
 
 export default function Collect() {
   const c = useColors();

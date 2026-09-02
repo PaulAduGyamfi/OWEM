@@ -7,12 +7,13 @@ import { Press } from './Pressable';
 import { Txt } from './Txt';
 
 export function Header({
-  right, onBack, close = false, tint,
+  right, onBack, close = false, tint, home = true,
 }: {
   right?: ReactNode;
   onBack?: () => void;
   close?: boolean;
   tint?: string;
+  home?: boolean;
 }) {
   const c = useColors();
   const router = useRouter();
@@ -39,7 +40,26 @@ export function Header({
       >
         <Icon name={close ? 'close' : 'back'} size={close ? 20 : 22} color={c.ink} strokeWidth={close ? 2 : 1.75} />
       </Press>
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: space[2] }}>{right}</View>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: space[2] }}>
+        {right}
+        {home && (
+          <Press
+            onPress={() => router.navigate('/(tabs)')}
+            haptic="select"
+            label="Back to events"
+            style={{
+              width: TAP,
+              height: TAP,
+              borderRadius: radius.full,
+              backgroundColor: tint ?? c.surfaceAlt,
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <Icon name="home" size={20} color={c.ink} strokeWidth={1.75} />
+          </Press>
+        )}
+      </View>
     </View>
   );
 }

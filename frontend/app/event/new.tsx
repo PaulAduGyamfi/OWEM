@@ -3,11 +3,11 @@ import { View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { formatDay } from '@/lib/format.ts';
-import { useOwem } from '@/lib/store';
 import { space, useColors } from '@/theme';
 import { Avatar } from '@/components/ui/Avatar';
 import { Button } from '@/components/ui/Button';
 import { Grouped, Row } from '@/components/ui/Card';
+import { DateSheet } from '@/components/ui/DateSheet';
 import { Field } from '@/components/ui/Field';
 import { Header, Title } from '@/components/ui/Header';
 import { Icon } from '@/components/ui/Icon';
@@ -19,14 +19,21 @@ export default function NewEvent() {
   const c = useColors();
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { createEvent } = useOwem();
   const [title, setTitle] = useState('');
   const [place, setPlace] = useState('');
+  const [when, setWhen] = useState(() => new Date());
+  const [picking, setPicking] = useState(false);
 
-  const go = async () => {
-    const id = await createEvent(title.trim() || "Dinner at Rosati's", place.trim() || null);
-    if (id) router.push({ pathname: '/event/[id]/participants', params: { id } });
-  };
+  const go = () =>
+    router.push({
+      pathname: '/event/[id]/participants',
+      params: {
+        id: 'new',
+        title: title.trim() || "Dinner at Rosati's",
+        place: place.trim(),
+        occurredAt: when.toISOString(),
+      },
+    });
 
   return (
     <Screen>
@@ -48,10 +55,10 @@ export default function NewEvent() {
           <View style={{ gap: space[2] }}>
             <Txt variant="caption" color="inkSecondary">DETAILS</Txt>
             <Grouped inset={space[4]}>
-              <Row>
+              <Row onPress={() => setPicking(true)}>
                 <Txt variant="bodyStrong" style={{ flex: 1 }}>When</Txt>
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                  <Txt variant="callout" color="inkSecondary" tnum>{formatDay(new Date().toISOString())}</Txt>
+                  <Txt variant="callout" color="inkSecondary" tnum>{formatDay(when.toISOString())}</Txt>
                   <Icon name="forward" size={18} color={c.inkTertiary} />
                 </View>
               </Row>
@@ -59,7 +66,6 @@ export default function NewEvent() {
                 <Txt variant="bodyStrong" style={{ flex: 1 }}>Currency</Txt>
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
                   <Txt variant="callout" color="inkSecondary">USD</Txt>
-                  <Icon name="forward" size={18} color={c.inkTertiary} />
                 </View>
               </Row>
               <Row>
@@ -83,6 +89,8 @@ export default function NewEvent() {
           <Button label="Add people" icon="arrowRight" onPress={go} />
         </View>
       </View>
+
+      <DateSheet open={picking} onClose={() => setPicking(false)} value={when} onChange={setWhen} />
     </Screen>
   );
 }

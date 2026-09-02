@@ -18,6 +18,7 @@ class Settings(BaseSettings):
     dev_user_email: str = "payer@owem.local"
 
     ai_model: str = "claude-opus-5"
+    anthropic_workspace_id: str = ""
     ai_timeout_seconds: int = 120
     ai_use_stub: bool | None = None
 

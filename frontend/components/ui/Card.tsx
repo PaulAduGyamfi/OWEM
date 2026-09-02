@@ -36,11 +36,12 @@ export function Separator({ inset = 0 }: { inset?: number }) {
 }
 
 export function Row({
-  children, height = 56, onPress, style, tint,
+  children, height = 56, onPress, onLongPress, style, tint,
 }: {
   children: ReactNode;
   height?: number;
   onPress?: () => void;
+  onLongPress?: () => void;
   style?: StyleProp<ViewStyle>;
   tint?: string;
 }) {
@@ -61,7 +62,11 @@ export function Row({
       {children}
     </View>
   );
-  return onPress ? <Press onPress={onPress}>{body}</Press> : body;
+  return onPress ? (
+    <Press onPress={onPress} onLongPress={onLongPress}>{body}</Press>
+  ) : (
+    body
+  );
 }
 
 export function Grouped({

@@ -9,14 +9,16 @@ import * as haptics from '@/lib/haptics';
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 export function Press({
-  children, onPress, disabled, style, hitSlop = 6, haptic = 'tap',
+  children, onPress, onLongPress, disabled, style, hitSlop = 6, haptic = 'tap', label,
 }: {
   children: ReactNode;
   onPress?: () => void;
+  onLongPress?: () => void;
   disabled?: boolean;
   style?: StyleProp<ViewStyle>;
   hitSlop?: number;
-  haptic?: 'tap' | 'select' | 'commit' | 'none';
+  haptic?: 'tap' | 'select' | 'commit' | 'warn' | 'none';
+  label?: string;
 }) {
   const scale = useSharedValue(1);
   const animated = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
@@ -24,6 +26,7 @@ export function Press({
   return (
     <AnimatedPressable
       accessibilityRole="button"
+      accessibilityLabel={label}
       disabled={disabled}
       hitSlop={hitSlop}
       onPressIn={() => {
@@ -36,6 +39,10 @@ export function Press({
         if (haptic !== 'none') haptics[haptic]();
         onPress?.();
       }}
+      onLongPress={onLongPress && (() => {
+        haptics.commit();
+        onLongPress();
+      })}
       style={[style, animated]}
     >
       {children}

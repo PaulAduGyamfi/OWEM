@@ -343,7 +343,8 @@ class TestExtractionOverHttp:
     def test_the_call_is_logged_without_the_image(self, client):
         from sqlalchemy import select
 
-        from owem.db import AiCallRow, SessionFactory
+        from owem.db import SessionFactory
+        from owem.tables import AiCallRow
 
         event = make_event(client)
         ok(upload(client, event["id"]), 201)

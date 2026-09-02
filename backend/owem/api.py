@@ -124,7 +124,7 @@ def health() -> dict[str, str]:
 
 @app.post("/api/events", status_code=status.HTTP_201_CREATED)
 def create_event(body: CreateEvent, session: Db, owner: User) -> Event:
-    event = db.add_event(session, owner, body.title.strip(), body.place)
+    event = db.add_event(session, owner, body.title.strip(), body.place, body.occurred_at)
     db.add_participant(session, event.id, "You", is_payer=True)
     return event
 
@@ -148,6 +148,15 @@ def get_event(event_id: UUID, session: Db, owner: User) -> EventDetail:
         payments=db.payments(session, event_id),
         settlement_version=settlement.version if settlement else None,
     )
+
+
+@app.delete("/api/events/{event_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_event(event_id: UUID, session: Db, owner: User) -> None:
+    owned_event(session, event_id, owner)
+    image_key = db.receipt_image_key(session, event_id)
+    if image_key:
+        storage.remove(image_key)
+    db.delete_event(session, event_id)
 
 
 @app.post("/api/events/{event_id}/participants", status_code=status.HTTP_201_CREATED)

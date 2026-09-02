@@ -1,11 +1,11 @@
 import { useMemo, useState } from 'react';
-import { ScrollView, View } from 'react-native';
+import { ScrollView, TextInput, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { cents, formatMoney } from '@/lib/money.ts';
 import { formatShortDay } from '@/lib/format.ts';
 import { paidBy, useEvent, useOwem } from '@/lib/store';
-import { radius, space, useColors } from '@/theme';
+import { radius, space, type as typography, useColors } from '@/theme';
 import { Avatar } from '@/components/ui/Avatar';
 import { Badge, Chip } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
@@ -18,6 +18,8 @@ import { Txt } from '@/components/ui/Txt';
 import { Banner } from '@/components/owem/Provenance';
 
 type Tone = 'Friendly' | 'Direct' | 'Playful';
+
+const TONES: Tone[] = ['Friendly', 'Direct', 'Playful'];
 
 function draft(tone: Tone, name: string, amount: string, event: string, when: string): string {
   if (tone === 'Direct') {
@@ -37,6 +39,8 @@ export default function Reminders() {
   const { s } = useOwem();
   const { event, settlement, participants, payer } = useEvent(id);
   const [tone, setTone] = useState<Tone>('Friendly');
+  const [edits, setEdits] = useState<Record<string, string>>({});
+  const [selected, setSelected] = useState<string | null>(null);
   const [sent, setSent] = useState(false);
 
   const owing = useMemo(() => {
@@ -54,10 +58,38 @@ export default function Reminders() {
 
   if (!event) return <Screen><Header /></Screen>;
 
-  const first = owing[0];
-  const preview = first
-    ? draft(tone, first.person.displayName, formatMoney(first.left), event.title, formatShortDay(event.occurredAt))
-    : '';
+  const active = owing.find((r) => r.person.id === selected) ?? owing[0];
+
+  const drafted = (personId: string): string => {
+    const row = owing.find((r) => r.person.id === personId);
+    if (!row) return '';
+    return draft(
+      tone,
+      row.person.displayName,
+      formatMoney(row.left),
+      event.title,
+      formatShortDay(event.occurredAt),
+    );
+  };
+
+  const messageFor = (personId: string): string => edits[personId] ?? drafted(personId);
+
+  const retone = (next: Tone) => {
+    setTone(next);
+    setEdits({});
+  };
+
+  const redraftActive = () => {
+    if (!active) return;
+    const personId = active.person.id;
+    setEdits((prev) => {
+      const next = { ...prev };
+      delete next[personId];
+      return next;
+    });
+  };
+
+  const edited = active ? edits[active.person.id] !== undefined : false;
 
   return (
     <Screen>
@@ -67,7 +99,7 @@ export default function Reminders() {
         sub={
           owing.length === 0
             ? 'Nobody owes you anything on this one.'
-            : `${owing.length} ${owing.length === 1 ? 'person' : 'people'}, ${owing.length === 1 ? 'one amount' : 'different amounts'}.`
+            : `${owing.length} ${owing.length === 1 ? 'person' : 'people'}, each with their own message.`
         }
       />
 
@@ -75,69 +107,96 @@ export default function Reminders() {
         style={{ flex: 1 }}
         contentContainerStyle={{ padding: space[4], gap: space[4] }}
         showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
       >
         <View style={{ flexDirection: 'row', gap: space[2], flexWrap: 'wrap' }}>
-          {owing.map((r) => (
-            <View
-              key={r.person.id}
-              style={{
-                height: 36,
-                paddingLeft: 6,
-                paddingRight: space[3],
-                borderRadius: radius.full,
-                backgroundColor: c.surface,
-                borderWidth: 0.5,
-                borderColor: c.border,
-                flexDirection: 'row',
-                alignItems: 'center',
-                gap: space[2],
-              }}
-            >
-              <Avatar name={r.person.displayName} size={24} />
-              <Txt variant="footnote" tnum>
-                {r.person.displayName} {formatMoney(r.left)}
-              </Txt>
-            </View>
-          ))}
+          {owing.map((r) => {
+            const on = active?.person.id === r.person.id;
+            return (
+              <Press
+                key={r.person.id}
+                onPress={() => setSelected(r.person.id)}
+                haptic="select"
+                label={`Write to ${r.person.displayName}`}
+                style={{
+                  height: 36,
+                  paddingLeft: 6,
+                  paddingRight: space[3],
+                  borderRadius: radius.full,
+                  backgroundColor: on ? c.ink : c.surface,
+                  borderWidth: 0.5,
+                  borderColor: on ? c.ink : c.border,
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  gap: space[2],
+                }}
+              >
+                <Avatar name={r.person.displayName} size={24} />
+                <Txt variant="footnote" tnum style={{ color: on ? c.onInk : c.ink }}>
+                  {r.person.displayName} {formatMoney(r.left)}
+                </Txt>
+                {edits[r.person.id] !== undefined && (
+                  <Icon name="edit" size={12} color={on ? c.onInk : c.inkSecondary} strokeWidth={2} />
+                )}
+              </Press>
+            );
+          })}
         </View>
 
-        <Card padded style={{ borderRadius: radius.xl, gap: space[3] }}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-            <Badge
-              label="DRAFTED BY AI · NOT SENT"
-              tone="accent"
-              icon={<Icon name="sparkle" size={12} color={c.ink} strokeWidth={2} />}
+        {active && (
+          <Card padded style={{ borderRadius: radius.xl, gap: space[3] }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+              <Badge
+                label={edited ? 'EDITED BY YOU · NOT SENT' : 'DRAFTED BY AI · NOT SENT'}
+                tone="accent"
+                icon={<Icon name={edited ? 'edit' : 'sparkle'} size={12} color={c.ink} strokeWidth={2} />}
+              />
+              <Txt variant="caption" color="inkSecondary">To {active.person.displayName}</Txt>
+            </View>
+
+            <TextInput
+              value={messageFor(active.person.id)}
+              onChangeText={(text) =>
+                setEdits((prev) => ({ ...prev, [active.person.id]: text }))
+              }
+              multiline
+              scrollEnabled={false}
+              selectTextOnFocus={false}
+              style={[
+                typography.body,
+                {
+                  color: c.ink,
+                  padding: space[4],
+                  borderRadius: radius.lg,
+                  borderTopLeftRadius: 6,
+                  backgroundColor: c.surfaceAlt,
+                  minHeight: 104,
+                  textAlignVertical: 'top',
+                },
+              ]}
             />
-            <Icon name="edit" size={20} color={c.inkSecondary} />
-          </View>
 
-          <View
-            style={{
-              padding: space[4],
-              borderRadius: radius.lg,
-              borderTopLeftRadius: 6,
-              backgroundColor: c.surfaceAlt,
-            }}
-          >
-            <Txt variant="body">{preview}</Txt>
-          </View>
-
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: space[2] }}>
-            {(['Friendly', 'Direct', 'Playful'] as Tone[]).map((t) => (
-              <Chip key={t} label={t} selected={tone === t} onPress={() => setTone(t)} />
-            ))}
-            <View style={{ flex: 1 }} />
-            <Press onPress={() => setTone(tone)} style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-              <Icon name="refresh" size={16} color={c.ink} />
-              <Txt variant="footnote" style={{ fontWeight: '600' }}>Redraft</Txt>
-            </Press>
-          </View>
-        </Card>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: space[2] }}>
+              {TONES.map((t) => (
+                <Chip key={t} label={t} selected={tone === t} onPress={() => retone(t)} />
+              ))}
+              <View style={{ flex: 1 }} />
+              <Press
+                onPress={redraftActive}
+                label="Redraft this message"
+                style={{ flexDirection: 'row', alignItems: 'center', gap: 6, opacity: edited ? 1 : 0.4 }}
+              >
+                <Icon name="refresh" size={16} color={c.ink} />
+                <Txt variant="footnote" style={{ fontWeight: '600' }}>Redraft</Txt>
+              </Press>
+            </View>
+          </Card>
+        )}
 
         <Banner
           tone="neutral"
           icon="info"
-          text="Each person's message carries their own amount. Nothing leaves your phone until you tap send — and the draft can't change what anyone owes."
+          text="Each person gets their own message with their own amount. Nothing leaves your phone until you tap send — and no draft can change what anyone owes."
         />
 
         <Grouped inset={space[4]}>
@@ -153,7 +212,13 @@ export default function Reminders() {
 
       <View style={{ paddingHorizontal: space[4], paddingBottom: insets.bottom + space[4] }}>
         <Button
-          label={sent ? 'Sent' : `Approve and send ${owing.length}`}
+          label={
+            sent
+              ? 'Sent'
+              : owing.length === 1
+                ? `Send to ${owing[0].person.displayName}`
+                : `Send ${owing.length} separate messages`
+          }
           disabled={owing.length === 0 || sent}
           onPress={() => {
             setSent(true);

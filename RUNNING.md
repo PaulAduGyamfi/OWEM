@@ -39,7 +39,7 @@ python3.12 -m venv .venv
 cp .env.example .env
 .venv/bin/alembic upgrade head          # creates the 11 tables
 .venv/bin/python scripts/seed_demo.py   # a dinner to look at
-.venv/bin/uvicorn owem.api.main:app --reload
+.venv/bin/uvicorn owem.api:app --reload
 ```
 
 - API: <http://localhost:8000>
@@ -84,7 +84,7 @@ EXPO_PUBLIC_API_BASE_URL=http://192.168.1.192:8000
 Then restart the API so it listens beyond loopback:
 
 ```bash
-.venv/bin/uvicorn owem.api.main:app --reload --host 0.0.0.0
+.venv/bin/uvicorn owem.api:app --reload --host 0.0.0.0
 ```
 
 Restart `npm start` after editing `.env` — Expo reads it at build time.

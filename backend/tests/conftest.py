@@ -6,8 +6,9 @@ from fastapi.testclient import TestClient
 from sqlalchemy import text
 
 from owem.api import app
-from owem.db import Base, engine
+from owem.db import engine
 from owem.models import Assignment, Receipt, ReceiptItem
+from owem.tables import Base
 
 API = "/api"
 

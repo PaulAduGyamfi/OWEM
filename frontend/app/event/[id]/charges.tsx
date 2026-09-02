@@ -31,6 +31,7 @@ export default function Charges() {
   const tax = receipt?.tax ?? cents(0);
   const total = cents(subtotal + tax + tip);
   const percent = subtotal > 0 ? Math.round((tip / subtotal) * 100) : 0;
+  const needsPeople = participants.length < 2;
 
   const adjustTip = useCallback(
     (deltaPercentPoints: number) => {
@@ -134,11 +135,15 @@ export default function Charges() {
 
         <View style={{ paddingHorizontal: space[4], paddingTop: space[2], paddingBottom: insets.bottom }}>
           <Button
-            label="Assign items"
+            label={needsPeople ? 'Add who was there' : 'Assign items'}
             icon="arrowRight"
             onPress={() => {
               void setCharges(id, receiptId, { tip, tipPolicy: policy });
-              router.push({ pathname: '/event/[id]/assign', params: { id, receiptId } });
+              router.push(
+                needsPeople
+                  ? { pathname: '/event/[id]/participants', params: { id } }
+                  : { pathname: '/event/[id]/assign', params: { id, receiptId } },
+              );
             }}
           />
         </View>

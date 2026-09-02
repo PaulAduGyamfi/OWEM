@@ -14,7 +14,8 @@ import { Header } from '@/components/ui/Header';
 import { Money } from '@/components/ui/Money';
 import { Screen } from '@/components/ui/Screen';
 import { Txt } from '@/components/ui/Txt';
-import { RecordPaymentSheet, RequestSheet } from '@/components/owem/PaymentSheets';
+import { RecordPaymentSheet } from '@/components/owem/RecordPaymentSheet';
+import { RequestSheet } from '@/components/owem/RequestSheet';
 import { Banner } from '@/components/owem/Provenance';
 
 export default function Breakdown() {

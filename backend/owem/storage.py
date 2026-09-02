@@ -39,7 +39,15 @@ def save(data: bytes, kind: str) -> str:
 
 
 def load(key: str) -> bytes:
+    return _resolve(key).read_bytes()
+
+
+def remove(key: str) -> None:
+    _resolve(key).unlink(missing_ok=True)
+
+
+def _resolve(key: str) -> Path:
     path = (ROOT / key).resolve()
     if not path.is_relative_to(ROOT.resolve()):
         raise ValueError(f"key escapes the storage root: {key}")
-    return path.read_bytes()
+    return path

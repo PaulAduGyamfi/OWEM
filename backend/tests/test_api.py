@@ -354,3 +354,47 @@ def test_a_zero_payment_is_refused(client):
         json={"participantId": people["Nia"], "amount": "0.00", "method": "cash"},
     )
     assert response.status_code in (400, 409)
+
+
+def test_an_event_can_be_created_on_a_chosen_date(client):
+    event = ok(
+        client.post(
+            f"{API}/events",
+            json={"title": "Last Friday", "place": None, "occurredAt": "2026-08-28T19:30:00Z"},
+        ),
+        201,
+    )
+    assert event["occurredAt"].startswith("2026-08-28T19:30:00")
+
+
+def test_an_event_without_a_date_gets_today(client):
+    event = make_event(client)
+    assert event["occurredAt"] is not None
+
+
+def test_deleting_an_event_takes_its_settlement_with_it(client):
+    event_id, _ = build_dinner(client)
+    ok(client.post(f"{API}/events/{event_id}/settlement", json={}), 201)
+
+    ok(client.delete(f"{API}/events/{event_id}"), 204)
+
+    assert client.get(f"{API}/events/{event_id}").status_code == 404
+    assert client.get(f"{API}/events/{event_id}/settlement").status_code == 404
+    assert all(e["id"] != event_id for e in ok(client.get(f"{API}/events")))
+
+
+def test_deleting_an_event_leaves_the_others_alone(client):
+    keep = make_event(client, title="Keep me")
+    drop = make_event(client, title="Drop me")
+
+    ok(client.delete(f"{API}/events/{drop['id']}"), 204)
+
+    remaining = [e["id"] for e in ok(client.get(f"{API}/events"))]
+    assert keep["id"] in remaining
+    assert drop["id"] not in remaining
+
+
+def test_deleting_an_event_twice_is_a_404(client):
+    event = make_event(client)
+    ok(client.delete(f"{API}/events/{event['id']}"), 204)
+    assert client.delete(f"{API}/events/{event['id']}").status_code == 404

@@ -6,7 +6,7 @@ from alembic import context
 from sqlalchemy import engine_from_config, pool
 
 from owem.config import settings
-from owem.db import Base
+from owem.tables import Base
 
 config = context.config
 if config.config_file_name is not None:

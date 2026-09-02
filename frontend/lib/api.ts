@@ -158,8 +158,10 @@ export const api = {
   getSettlement: async (eventId: string) =>
     toSettlement(await request('GET', `/events/${eventId}/settlement`)),
 
-  createEvent: (title: string, place: string | null) =>
-    request<Event>('POST', '/events', { title, place }),
+  createEvent: (title: string, place: string | null, occurredAt: string | null) =>
+    request<Event>('POST', '/events', { title, place, occurredAt }),
+
+  deleteEvent: (eventId: string) => request<void>('DELETE', `/events/${eventId}`),
 
   addParticipant: (eventId: string, displayName: string) =>
     request('POST', `/events/${eventId}/participants`, { displayName }),

@@ -8,114 +8,10 @@ import {
   type ReactNode,
 } from 'react';
 import { ApiError, api } from './api.ts';
-import { cents } from './money.ts';
-import type {
-  Assignment,
-  Cents,
-  Event,
-  EventDetail,
-  Extraction,
-  Participant,
-  PaymentMethod,
-  Settlement,
-  SettlementLine,
-  TipPolicy,
-} from './types.ts';
+import { EMPTY, latestSettlement, summarise, type State } from './selectors.ts';
+import type { Cents, EventDetail, Extraction, PaymentMethod, Settlement, TipPolicy } from './types.ts';
 
-export type State = {
-  events: Event[];
-  details: Record<string, EventDetail>;
-  settlements: Record<string, Settlement>;
-  history: Record<string, Settlement[]>;
-};
-
-const EMPTY: State = { events: [], details: {}, settlements: {}, history: {} };
-
-export type Summary = {
-  event: Event;
-  participants: Participant[];
-  headcount: number;
-  owedToPayer: Cents;
-  collected: Cents;
-  outstanding: Cents;
-  settlement: Settlement | null;
-};
-
-export function detailOf(state: State, eventId: string): EventDetail | undefined {
-  return state.details[eventId];
-}
-
-export function participantsOf(state: State, eventId: string): Participant[] {
-  return state.details[eventId]?.participants ?? [];
-}
-
-export function itemsOf(state: State, eventId: string) {
-  return state.details[eventId]?.items ?? [];
-}
-
-export function assignmentsOf(state: State, eventId: string, itemId: string): Assignment[] {
-  return (state.details[eventId]?.assignments ?? []).filter((a) => a.itemId === itemId);
-}
-
-export function latestSettlement(state: State, eventId: string): Settlement | null {
-  return state.settlements[eventId] ?? null;
-}
-
-export function lineFor(
-  settlement: Settlement | null,
-  participantId: string,
-): SettlementLine | undefined {
-  return settlement?.lines.find((line) => line.participantId === participantId);
-}
-
-export function isPayer(state: State, eventId: string, participantId: string): boolean {
-  return participantsOf(state, eventId).some((p) => p.id === participantId && p.isPayer);
-}
-
-export function paidBy(state: State, eventId: string, participantId: string): Cents {
-  const payments = state.details[eventId]?.payments ?? [];
-  return cents(
-    payments
-      .filter((payment) => payment.participantId === participantId)
-      .reduce((total, payment) => total + payment.amount, 0),
-  );
-}
-
-export function summarise(state: State, eventId: string): Summary {
-  const detail = state.details[eventId];
-  const event = detail ?? state.events.find((e) => e.id === eventId)!;
-  const participants = detail?.participants ?? [];
-  const settlement = latestSettlement(state, eventId);
-  const payer = participants.find((p) => p.isPayer);
-
-  const owing = (settlement?.lines ?? []).filter((line) => line.participantId !== payer?.id);
-  const owed = owing.reduce((total, line) => total + line.amountOwed, 0);
-  const paid = owing.reduce(
-    (total, line) => total + paidBy(state, eventId, line.participantId),
-    0,
-  );
-  const outstanding = owing.reduce(
-    (total, line) =>
-      total + Math.max(0, line.amountOwed - paidBy(state, eventId, line.participantId)),
-    0,
-  );
-
-  return {
-    event,
-    participants,
-    headcount: participants.length,
-    owedToPayer: cents(owed),
-    collected: cents(paid),
-    outstanding: cents(outstanding),
-    settlement,
-  };
-}
-
-export function totalOutstanding(state: State): Cents {
-  return cents(
-    state.events.reduce((total, event) => total + summarise(state, event.id).outstanding, 0),
-  );
-}
+export * from './selectors.ts';
 
 type Store = {
   s: State;
@@ -124,7 +20,8 @@ type Store = {
   lastError: string | null;
   clearError: () => void;
   refresh: () => Promise<void>;
-  createEvent: (title: string, place: string | null) => Promise<string>;
+  createEvent: (title: string, place: string | null, occurredAt: string | null) => Promise<string>;
+  deleteEvent: (eventId: string) => Promise<void>;
   addParticipant: (eventId: string, name: string) => Promise<void>;
   removeParticipant: (eventId: string, participantId: string) => Promise<void>;
   createReceipt: (eventId: string) => Promise<string>;
@@ -185,6 +82,20 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     }));
   }, []);
 
+  const forgetEvent = useCallback((eventId: string) => {
+    setS((prev) => {
+      const { [eventId]: _detail, ...details } = prev.details;
+      const { [eventId]: _settlement, ...settlements } = prev.settlements;
+      const { [eventId]: _history, ...history } = prev.history;
+      return {
+        events: prev.events.filter((e) => e.id !== eventId),
+        details,
+        settlements,
+        history,
+      };
+    });
+  }, []);
+
   const refresh = useCallback(async () => {
     const events = await api.listEvents();
     const details: Record<string, EventDetail> = {};
@@ -243,10 +154,14 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       clearError: () => setLastError(null),
       refresh,
 
-      createEvent: async (title, place) => {
-        const event = await run(() => api.createEvent(title, place));
+      createEvent: async (title, place, occurredAt) => {
+        const event = await run(() => api.createEvent(title, place, occurredAt));
         if (event) await loadEvent(event.id);
         return event?.id ?? '';
+      },
+
+      deleteEvent: async (eventId) => {
+        await run(() => api.deleteEvent(eventId), async () => forgetEvent(eventId));
       },
 
       createReceipt: async (eventId) => {
@@ -297,7 +212,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         );
       },
     }),
-    [s, loading, busy, lastError, run, refresh, loadEvent],
+    [s, loading, busy, lastError, run, refresh, loadEvent, forgetEvent],
   );
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;

@@ -1,10 +1,11 @@
+import { useState } from 'react';
 import { ScrollView, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { formatShortDay, pluralise } from '@/lib/format.ts';
 import { summarise, totalOutstanding, useOwem } from '@/lib/store';
 import { radius, space, useTheme } from '@/theme';
-import { AvatarStack } from '@/components/ui/Avatar';
+import { Avatar, AvatarStack } from '@/components/ui/Avatar';
 import { Badge } from '@/components/ui/Badge';
 import { Grouped, Row } from '@/components/ui/Card';
 import { Icon, type IconName } from '@/components/ui/Icon';
@@ -13,12 +14,14 @@ import { Press } from '@/components/ui/Pressable';
 import { DOCK_HEIGHT } from '@/components/ui/TabBar';
 import { Txt } from '@/components/ui/Txt';
 import { Banner } from '@/components/owem/Provenance';
+import { DeleteEventSheet } from '@/components/owem/DeleteEventSheet';
 
 export default function Events() {
   const { c, scheme } = useTheme();
-  const { s, loading } = useOwem();
+  const { s, loading, deleteEvent } = useOwem();
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const [doomed, setDoomed] = useState<{ id: string; title: string; settled: boolean } | null>(null);
 
   const cardBg = scheme === 'dark' ? c.surfaceAlt : c.ink;
   const cardFg = scheme === 'dark' ? c.ink : c.onInk;
@@ -54,17 +57,31 @@ export default function Events() {
         contentContainerStyle={{ paddingBottom: DOCK_HEIGHT + space[6] }}
         stickyHeaderIndices={[]}
       >
-        {/* Balance card: full-bleed ink, rounded at the bottom, top third. */}
         <View
           style={{
             backgroundColor: cardBg,
             borderBottomLeftRadius: radius.xxl,
             borderBottomRightRadius: radius.xxl,
-            paddingTop: insets.top + space[5],
+            paddingTop: insets.top + space[2],
             paddingHorizontal: space[5],
             paddingBottom: space[8],
           }}
         >
+          <View
+            style={{
+              height: 44,
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              marginBottom: space[4],
+            }}
+          >
+            <Txt variant="bodyStrong" style={{ color: cardFg, letterSpacing: 0.5 }}>OWEM</Txt>
+            <Press onPress={() => router.navigate('/(tabs)/profile')} label="Your profile">
+              <Avatar name="Paul" size={32} payer />
+            </Press>
+          </View>
+
           <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
             <Txt variant="footnote" style={{ color: cardMuted }}>You're owed</Txt>
             <View
@@ -96,7 +113,7 @@ export default function Events() {
               const first = events.find((e) => summarise(s, e.id).outstanding > 0);
               if (first) router.push({ pathname: '/event/[id]/reminders', params: { id: first.id } });
             })}
-            {action('camera', 'Scan', () => router.push('/event/new'))}
+            {action('camera', 'Scan', () => router.push('/scan'))}
           </View>
         </View>
 
@@ -116,6 +133,7 @@ export default function Events() {
                 <Row
                   key={e.id}
                   height={76}
+                  onLongPress={() => setDoomed({ id: e.id, title: e.title, settled })}
                   onPress={() =>
                     router.push(
                       !worked
@@ -153,6 +171,15 @@ export default function Events() {
           />
         </View>
       </ScrollView>
+
+      <DeleteEventSheet
+        event={doomed}
+        onClose={() => setDoomed(null)}
+        onConfirm={(eventId) => {
+          setDoomed(null);
+          void deleteEvent(eventId);
+        }}
+      />
     </View>
   );
 }

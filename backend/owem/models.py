@@ -175,6 +175,7 @@ class ExtractedReceipt(Model):
 class CreateEvent(Model):
     title: str = Field(min_length=1, max_length=200)
     place: str | None = Field(default=None, max_length=200)
+    occurred_at: datetime | None = None
 
 
 class AddParticipant(Model):
