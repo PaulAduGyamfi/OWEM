@@ -1,5 +1,6 @@
 {
   "name": "owem",
+  "homepage": "https://www.owem.app/",
   "main": "expo-router/entry",
   "version": "0.1.0",
   "private": true,

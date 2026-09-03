@@ -15,6 +15,9 @@ dependencies = [
   "python-multipart>=0.0.20",
 ]
 
+[project.urls]
+Homepage = "https://www.owem.app/"
+
 [project.optional-dependencies]
 dev = [
   "pytest>=8.3",
